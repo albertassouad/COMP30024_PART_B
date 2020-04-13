@@ -24,14 +24,15 @@ class ExamplePlayer:
         represented based on the spec's instructions for representing actions.
         """
         # TODO: Decide what action to take, and return it
-        user_input = input("Enter action type: MOVE or BOOM")
-        if user_input == "MOVE":
-            num_of_tokens = input("Enter number of tokens to move")
-            initial_position = input("Enter initial token position")
-            final_position = input("Enter final token position")
-        
-        return ("BOOM", (0, 0))
-
+        action_type = input("Enter action type: MOVE or BOOM\n")
+        if action_type == "MOVE":
+            num_of_tokens = int(input("Enter number of tokens to move\n"))
+            initial_position = input("Enter initial token position\n").split()
+            final_position = input("Enter final token position\n").split()
+            return (action_type, num_of_tokens, (initial_position[0],initial_position[1]), (final_position[0],final_position[1]))
+        else :
+            position = input("Enter boom position\n").split()
+            return (action_type, (int(position[0]),int(position[1])))
 
     def update(self, colour, action):
         """
