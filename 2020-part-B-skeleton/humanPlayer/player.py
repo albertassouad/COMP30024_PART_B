@@ -29,7 +29,7 @@ class ExamplePlayer:
             num_of_tokens = int(input("Enter number of tokens to move\n"))
             initial_position = input("Enter initial token position\n").split()
             final_position = input("Enter final token position\n").split()
-            return (action_type, num_of_tokens, (initial_position[0],initial_position[1]), (final_position[0],final_position[1]))
+            return (action_type, num_of_tokens, (int(initial_position[0]), int(initial_position[1])), (int(final_position[0]),int(final_position[1])))
         else :
             position = input("Enter boom position\n").split()
             return (action_type, (int(position[0]),int(position[1])))
