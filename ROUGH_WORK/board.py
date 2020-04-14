@@ -1,4 +1,5 @@
 import copy
+from findboomzones import final_zones
 
 class Stack: 
 	def __init__(self, x, y, size, colour, parent=None):
@@ -101,14 +102,11 @@ class Board:
 
 	def __init__(self, whites, blacks, parent = None):
 
-		# self.whites = stack_representation(whites)
-		# self.blacks = stack_representation(blacks)
 
 
 		self.board = []
-		#store whites for expansion
 		self.whites = []
-		# self.blacks = []
+		self.blacks = []
 		self.parent = parent
 
 		for i in range(8):
@@ -120,23 +118,22 @@ class Board:
 
 		for w in whites:
 
-			size = w[0]		
-			x = w[1]
-			y = w[2]
+			size = 1		
+			x = w[0]
+			y = w[1]
 
 			self.board[x][y] = Stack(x, y, size, "white")
-
 			self.whites.append(Stack(x, y, size, "white"))
+
 
 		for b in blacks:
 
-			size = w[0]
-			x = w[1]
-			y = w[2]
+			size = 1
+			x = b[0]
+			y = b[1]
 
 			self.board[x][y] = Stack(x, y, size, "black")
-
-			# self.blacks.append(Stack(x, y, size, "black"))
+			self.blacks.append(Stack(x, y, size, "black"))
 
 		# print(self.board)
 		# print(self.whites)
@@ -195,17 +192,6 @@ class Board:
 
 		return Board(whites, blacks, self)
 
-	# def expand(self):
-	# 	children = []
-	# 	for i in range(8):
-	# 		for j in range(8):
-	# 			if isinstance(board[i][j], Token) and board[i][j].colour == 'white':
-	# 				for m in board[i][j].moves():
-	# 						self.board.append(row)
-
-
-
-	# 	children.append(Board(whites, self.blacks))
 
 	def expand(self):
 		child_boards = []
@@ -215,8 +201,6 @@ class Board:
 		for w in self.whites:
 			child_stacks.extend(w.moves())
 
-
-		[0,7] -> [1,7]
 		for s in child_stacks: 
 			# new_board = self.copy()
 			# new = self.update(s)
@@ -228,103 +212,31 @@ class Board:
 
 		return child_boards
 
-whites = [[1,0,7], [1,1,7],   [1,3,7], [1,4,7],   [1,6,7], [1,7,7],
-         [1,0,6], [1,1,6],   [1,3,6], [1,4,6],   [1,6,6], [1,7,6]]
+	def evaluation_function(self):
 
-blacks = [[1,0,1], [1,1,1],   [1,3,1], [1,4,1],   [1,6,1], [1,7,1],
-         [1,0,0], [1,1,0],   [1,3,0], [1,4,0],   [1,6,0], [1,7,0]]
+		# find black (opponent) boomzones --> maximize
+		black_boomzones = final_zones(self.blacks)
 
-board = Board(whites, blacks)
-print(board.board)
-
-
-# for b in board.whites:
-# 	print(b.array_representation())
-# print("------------------------------------------------------------------------------")
-# children = board.expand()
-# print(len(children))
-# for c in children:
-# 	print(c.array_representation())
-
-
-
-
-
-
-	# def update():
-
-
-	# def stack_representation(tokens) 
-
-
-
-
-# for white in whites:
-# 	print(actions(whites))
-
-
-# def actions(coordinate):
-
-# 	size = coordinate[0]
-# 	actions = []
-# 	for i in range(1, size+1): 
-# 		actions.extend(self.up(coordinate, i))
-# 		actions.extend(self.down(coordinate, i))
-# 		actions.extend(self.left(coordinate, i))
-# 		actions.extend(self.right(coordinate,i))
-# 	return actions
-
-
-
-# def up(token, n):
-# 		actions = []
-# 		for i in range(1, n+1):
-# 			for j in range(1, n+1):
-# 				up = [i, token[1], token[2] + j]
-# 				if self.onboard(up) and not self.black_token(up):
-# 					stack = [[token[0] - i, token[1], token[2]]]
-# 					stack.append(up)
-# 					actions.append(Move(stack, up, token, i))
+		# find white boomzones --> minimize
+		white_boomzones = final_zones(self.whites)
 		
-# 		return actions
+		for stack in self.blacks: print(stack.array_representation())
+		
+		print(white_boomzones)
 
-# 	def down(token, n):
-# 		actions = []
-# 		for i in range(1, n+1):
-# 			for j in range(1, n+1):
-# 				down = [i, token[1], token[2] - j]
-# 				if self.onboard(down) and not self.black_token(down):
-# 					stack = [[token[0] - i, token[1], token[2]]]
-# 					stack.append(down)
-# 					actions.append(Move(stack, down, token, i))
+		print(black_boomzones)
+		
+		# most simple eval function 
+		return len(self.whites) - len(self.blacks)
 
-# 		return actions
+blacks_init = [(0,7), (1,7),   (3,7), (4,7),   (6,7), (7,7),
+               (0,6), (1,6),   (3,6), (4,6),   (6,6), (7,6)]
 
+whites_init = [(0,1), (1,1),   (3,1), (4,1),   (6,1), (7,1),
+                (0,0), (1,0),   (3,0), (4,0),   (6,0), (7,0)]
 
-# 	def left(token, n):
-# 		actions = []
-# 		for i in range(1, n+1):
-# 			for j in range(1, n+1):
-# 				left = [i, token[1] - j, token[2]]
-# 				if self.onboard(left) and not self.black_token(left):
-# 					stack = [[token[0] - i, token[1], token[2]]]
-# 					stack.append(left)
-# 					actions.append(Move(stack, left, token, i))
-
-# 		return actions
-
-
-# 	def right(self, token, n):
-# 		actions = []
-# 		for i in range(1, n+1):
-# 			for j in range(1, n+1):
-# 				right = [i, token[1] + j, token[2]]
-# 				if self.onboard(right) and not self.black_token(right):
-# 					stack = [[token[0] - i, token[1], token[2]]]
-# 					stack.append(right)
-# 					actions.append(Move(stack, right, token, i))
-
-# 		return actions
-
+board = Board(whites_init, blacks_init)
+# print(board.board)
+print(board.evaluation_function())
 
 
