@@ -35,6 +35,7 @@ class ExamplePlayer:
             return (action_type, (int(position[0]),int(position[1])))
 
 
+
     def update(self, colour, action):
         """
         This method is called at the end of every turn (including your player’s 
