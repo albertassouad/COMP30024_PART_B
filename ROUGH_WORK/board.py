@@ -279,7 +279,7 @@ class Board:
 	* goal is to find critical positions
 	* consider only position that link two boomgroup
 	"""
-	def inter_boomgroup(self,boomgroups):
+	def inter_boomgroup(self,boomgroups): # NOT COMPLETE YET
 		link_positions = 0
 		boomspots = []
 		intergroups = []
