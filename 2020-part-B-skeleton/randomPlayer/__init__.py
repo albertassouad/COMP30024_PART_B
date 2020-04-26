@@ -5,4 +5,4 @@
 # example import below, you can define it in another file and import
 # it into this module with the name 'Player':
 
-from ai_is_the_answer.player import ExamplePlayer as Player
+from randomPlayer.player import ExamplePlayer as Player

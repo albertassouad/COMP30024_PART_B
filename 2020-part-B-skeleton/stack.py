@@ -20,8 +20,7 @@ class Stack:
 		return Stack(self.x, self.y, self.size, self.colour, self.parent)
 
 	# Possible moves from this stack, represented as the new stacks that can result from it
-	# Does not take into account black and white stacks already on the board
-	# We do this later
+	# We integrate these new stacks into the board in the Board class
 	def possible_moves(self):
 
 		new_stacks = []

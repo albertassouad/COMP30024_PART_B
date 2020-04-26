@@ -734,28 +734,28 @@ def best_move(board, player_white):
 
 	return chosen_move
 
-board = Board.new_board()
+# board = Board.new_board()
 
-white = AI(board, True)
-black = AI(board, False)
+# white = AI(board, True)
+# black = AI(board, False)
 
-moves = 0
-while moves < 10:
-	if moves % 2 == 0:
-		chosen_move = white.best_move()
-		squares_to_string(chosen_move)
-		print("-------------------------")
-		white.board.squares = chosen_move
-		black.board.squares = chosen_move
-	else:
-		# chosen_move = black.best_move()
-		chosen_move = black.board.possible_moves("black")[14]
-		squares_to_string(chosen_move)
-		print("-------------------------")
-		white.board.squares = chosen_move
-		black.board.squares = chosen_move
+# moves = 0
+# while moves < 10:
+# 	if moves % 2 == 0:
+# 		chosen_move = white.best_move()
+# 		squares_to_string(chosen_move)
+# 		print("-------------------------")
+# 		white.board.squares = chosen_move
+# 		black.board.squares = chosen_move
+# 	else:
+# 		# chosen_move = black.best_move()
+# 		chosen_move = black.board.possible_moves("black")[14]
+# 		squares_to_string(chosen_move)
+# 		print("-------------------------")
+# 		white.board.squares = chosen_move
+# 		black.board.squares = chosen_move
 	
-	moves +=1
+# 	moves +=1
 
 
 

@@ -105,7 +105,7 @@ class Board:
 
 	"""
 	* input: color
-	* return a list of stack of "color"
+	* return a list of "colour" stack 
 	"""	
 	def stacks_list(self, colour):
 		stacks = []
@@ -119,7 +119,6 @@ class Board:
 	* input: board state and color
 	* return list of boomgroup of the input color
 	* a boomgroup is formed by adjacent neighboors
-
 	"""
 	def boomgroup(self, player_white):
 		tokens = self.stacks_list(player_colour(player_white)) # list of stack of same color
@@ -168,7 +167,6 @@ class Board:
 				boomspot.update(self.boomSpotCalc(stack))
 			boomspots.append(boomspot)
 
-		print(boomspots)
 
 		# find intersection between boomspots of each group
 		for zone in boomspots:
@@ -223,8 +221,6 @@ class Board:
 				if position not in link_counts: # if key is not in dictionary
 					link_counts.setdefault(position, boomloss)
 				else: link_counts[position] += boomloss
-
-						
 
 		return link_counts
 
@@ -382,6 +378,60 @@ class Board:
 				if old_move[i][j] != new_move[i][j]:
 					return False
 		return True
+
+
+
+
+
+# Evaluation function will depend on what colour we are
+# simple evaluation function 
+def evaluation(board, player_white):
+	# print(board)
+	# squares_to_string(board.squares)
+
+	# feature: number of tokens difference
+	token_counts = board.counts()
+	n_blacks = counts['black']
+	n_whites = counts['white']
+	diff = n_whites - n_blacks
+	if not player_white:
+		 diff = -diff
+
+
+
+	groups = board.boomgroup(player_white)
+
+	# feature: number of group + average number of token per group
+	numGroup, average = board.boomgroup_average(groups)
+
+
+	# feature: boomloss
+	# dictionnary of position:boomloss
+	boomloss_counts = board.position_boomLoss(groups)
+	# TODO average boomloss per position ?
+
+	# TODO assign weight to each feature
+	return diff + numGroup + average
+
+
+# helper function
+def player_colour(player_white):
+	if player_white:
+		return "white"
+	return "black"
+
+
+def squares_to_string(squares):
+	for i in range(7,-1, -1):
+		row = "["
+		for j in range(8):
+			if squares[j][i] != '':
+				row += squares[j][i].to_string() + " "
+			else: 
+				row += "empty "
+		row += "]"
+		print(row)
+
 
 
 

@@ -1,7 +1,7 @@
 import copy
 import pdb
 
-def spotCalc(stack):
+def spotCalc(stack): 
 
 	spots = set()
 
