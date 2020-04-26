@@ -563,18 +563,30 @@ def minimax(board, depth, player_white, alpha, beta, maximizingPlayer=True):
 def evaluation(board, player_white):
 	# print(board)
 	# squares_to_string(board.squares)
-	counts = board.counts()
+
+	# feature: number of tokens difference
+	token_counts = board.counts()
 	n_blacks = counts['black']
 	n_whites = counts['white']
-
 	diff = n_whites - n_blacks
-
-	if player_white:
-		return diff
-	else:
-		return -diff
+	if not player_white:
+		 diff = -diff
 
 
+
+	groups = board.boomgroup(player_white)
+
+	# feature: number of group + average number of token per group
+	numGroup, average = board.boomgroup_average(groups)
+
+
+	# feature: boomloss
+	# dictionnary of position:boomloss
+	boomloss_counts = board.position_boomLoss(groups)
+	# TODO average boomloss per position ?
+
+	# TODO assign weight to each feature
+	return diff + numGroup + average
 
 
 def player_colour(player_white):
