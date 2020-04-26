@@ -44,7 +44,7 @@ class Stack:
 			c = "w" 
 		else :
 			c = "b"
-
+		# ((x,y), size, colour)
 		return "(("  + str(self.x) + "," + str(self.y) + ")," + str(self.size) + "," + c + ")"
 
 	def up(self, n):
@@ -151,8 +151,8 @@ class Board:
 	# Creates a brand new board with white and black tokes in starting positions
 	def new_board():
 
-		blacks = [[1,0,1], [1,1,1],   [0,3,1], [1,4,1],   [1,6,1], [1,7,1],
-         			[1,0,0], [1,1,0],   [2,3,0], [1,4,0],   [1,6,0], [1,7,0]]
+		blacks = [[1,0,1], [1,1,1],   [1,3,1], [1,4,1],   [1,6,1], [1,7,1],
+         			[1,0,0], [1,1,0],   [1,3,0], [1,4,0],   [1,6,0], [1,7,0]]
 
 		whites = [[1,0,7], [1,1,7],   [1,3,7], [1,4,7],   [1,6,7], [1,7,7],
         			[1,0,6], [1,1,6],   [1,3,6], [1,4,6],   [1,6,6], [1,7,6]]
@@ -227,7 +227,10 @@ class Board:
 					counts[self.squares[i][j].colour] += self.squares[i][j].size
 		return counts
 
-	# return a list of stack of same color	
+	"""
+	* input: color
+	* return a list of stack of "color"
+	"""	
 	def stacks_list(self, colour):
 		stacks = []
 		for i in range(8):
@@ -236,7 +239,12 @@ class Board:
 					stacks.append(self.squares[i][j])
 		return stacks
 
-	# return number of boomgroups and average number of token in one boomgroup for evaluation function
+	"""
+	* input: board state and color
+	* return list of boomgroup of the input color
+	* a boomgroup is formed by adjacent neighboors
+
+	"""
 	def boomgroup(self, player_white):
 		tokens = self.stacks_list(player_colour(player_white)) # list of stack of same color
 		done = set()
@@ -257,19 +265,127 @@ class Board:
 						group.add(other)
 				
 
-				done = done.union(group) # update done set
+				done.update(group) # update done set
 				groups.append(group)
 
 			if len(done) == len(tokens): break # if all tokens have been visited
 
+		return groups
+
+
+	"""
+	* input: list of boomgroups
+	* return number of positions that link two or more boomgroup and number of token affected 
+	* goal is to find critical positions
+	* consider only position that link two boomgroup
+	"""
+	def inter_boomgroup(self,boomgroups):
+		link_positions = 0
+		boomspots = []
+		intergroups = []
+		link_counts = {} # key = position : value = number of tokens affected
+
+		# list of boomspots for each group and
+		for group in boomgroups:
+			boomspot = set()
+			for stack in group:
+				boomspot.update(self.boomSpotCalc(stack))
+			boomspots.append(boomspot)
+
+		print(boomspots)
+
+		# find intersection between boomspots of each group
+		for zone in boomspots:
+			print("\n\n\n")
+			print("zone",zone)
+			# temporary list of zones without the zone, so it does not find the intersection with itself
+			zones_temp = copy.copy(boomspots)
+			zones_temp.remove(zone)
+			
+
+			# check intersections with other zones
+			for other in zones_temp:
+				print("other",other)
+				inter = zone & other
+				print("Intersectrion",inter)
+				if inter:
+					# if intersection not already added
+					if (inter) not in intergroups:
+						# TODO compute number of tokens affected
+						num_of_tokens = 3
+						intergroups.append(inter)
+
+						# count number of tokens affected by a boom at position
+						for position in inter:
+							if position not in link_counts: # if key is not in dictionary
+								link_counts.setdefault(position, num_of_tokens)
+							else: link_counts[position] += num_of_tokens
+
+		return link_counts
+
+
+	"""
+	* input: list of boomgroups
+	* return dictionary with position as key and boomloss as value
+	* goal is to find critical positions
+	* boomloss is number of token loss if boom at this position
+	"""
+	def position_boomLoss(self,boomgroups):
+		link_counts = {} # key = position : value = boomloss/number of tokens affected
+
+		# list of boomspots for each group and
+		for group in boomgroups:
+
+			# get a list of boomspot for each group and count number of token in that group = boomloss
+			boomspot = set()
+			boomloss = 0
+			for stack in group:
+				boomspot.update(self.boomSpotCalc(stack))
+				boomloss += stack.size
+
+			for position in boomspot:
+				if position not in link_counts: # if key is not in dictionary
+					link_counts.setdefault(position, boomloss)
+				else: link_counts[position] += boomloss
+
+						
+
+		return link_counts
+
+	"""
+	* input: stack
+	* return boomspots of this stack
+	"""
+	def boomSpotCalc(self, stack):
+
+		spots = set()
+
+		x = stack.x
+		y = stack.y
+
+		for i in range(x-1, x+2):
+				for j in range(y-1, y+2):
+					# spot has to be on board and (empty or another colour)
+					if (stack.onboard(i,j) and (self.squares[i][j] == '' or board.squares[i][j].colour != stack.colour)):
+						spots.add((i,j))
+
+		return spots
+
+	
+	"""	
+	* input: list of boomgroups
+	* return number of boomgroup and average number of token per group	
+	* 
+	"""
+	def boomgroup_average(self,boomgroups):
 		# compute average number of token per group
 		average = 0
-		for group in groups:
+		for group in boomgroups:
 			for stack in group:
 				average += stack.size
 		average = average/len(groups)
 
-		return len(groups), average
+		return len(boomgroups), average
 
 	# Takes the new stack generated by a move, and creates a new board with 
 	# that move taken into account
@@ -488,9 +604,12 @@ def stack_list_string(list):
 
 board = Board.new_board()
 squares_to_string(board.squares)
-player_white = False
+player_white = True
 groups = board.boomgroup(player_white)
-print(groups)
+
+counts = board.position_boomLoss(groups)
+print(counts)
+print("Number of boomspots: ", len(counts))
 
 # for group in groups:
 # 	print("\n\n\n")
@@ -500,7 +619,8 @@ print(groups)
 
 
 
-# stack1 = Stack(1, 0, 1, "white")
+# stack1 = Stack(0, 1, 1, "black")
+# print(board.boomSpotCalc(stack1))
 # stack2 = Stack(1, 1, 1, "white")
 
 
