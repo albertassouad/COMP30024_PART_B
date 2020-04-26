@@ -15,7 +15,7 @@ class ExamplePlayer:
         """
         # TODO: Set up state representation.
 
-        self.board = Board(whites_init, blacks_init)
+        self.board = Board.new_board()
 
 
     def action(self):
@@ -29,8 +29,9 @@ class ExamplePlayer:
         """
         # TODO: Decide what action to take, and return it
         board = self.board
-        token = board.whites[random.randint(0, len(board.whites) - 1)]
-        move = token.moves()[random.randint(0, len(token.moves()) - 1)]
+        tokens = self.stacks_list(player_colour(True)) # list of stack of same color, now white
+        token = tokens[random.randint(0, len(tokens) - 1)]
+        move = token.moves()[random.randint(0, len(token.moves()) - 1)] # only "MOVE" move, no boom
         return ('MOVE', 1, (token.x, token.y), (move.x,move.y))
 
     def update(self, colour, action):

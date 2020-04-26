@@ -15,7 +15,7 @@ class ExamplePlayer:
         """
         # TODO: Set up state representation.
 
-        self.board = Board(whites_init, blacks_init)
+        self.board = Board.new_board()
 
 
     def action(self):
@@ -28,11 +28,7 @@ class ExamplePlayer:
         represented based on the spec's instructions for representing actions.
         """
         # TODO: Decide what action to take, and return it
-        board = self.board
-        token = board.whites[random.randint(0, len(board.whites) - 1)]
-        move = token.moves()[random.randint(0, len(token.moves()) - 1)]
-        return ('MOVE', 1, (token.x, token.y), (move.x,move.y))
-
+    
     def update(self, colour, action):
         """
         This method is called at the end of every turn (including your player’s 
