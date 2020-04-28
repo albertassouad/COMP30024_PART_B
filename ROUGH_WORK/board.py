@@ -773,6 +773,7 @@ groups = board.boomgroup(player_white)
 
 counts = board.position_boomLoss(groups)
 print(counts)
+print(max(counts))
 print("Number of boomspots: ", len(counts))
 
 # for group in groups:

@@ -73,6 +73,54 @@ class AI:
 		counts = board.counts()
 		n_blacks = counts['black']
 		n_whites = counts['white']
+		
+		if counts[my_colour] == 0:
+			return -1000
+		elif counts[opp_colour] == 0:
+			return 10000
+
+		else:
+			diff = n_whites - n_blacks
+
+			if not player_white:
+				diff = -diff
+				# return eval_sum
+		
+
+		# feature of our tokens
+		my_boomgroups = board.boomgroupCalc(player_white)
+		my_n_boomgroup, my_boomgroup_avg = board.boomgroup_average(my_boomgroups) # (number of boomgroup, average of tokens per boomgroup)
+		my_boomloss = board.position_boomloss(my_boomgroups)
+		my_sum_boomloss = sum(my_boomloss.values()) # TODO
+
+
+		# feature of opponent tokens
+		opp_boomgroups = board.boomgroupCalc(not player_white)
+		opp_n_boomgroup, opp_avg_boomgroup  = board.boomgroup_average(opp_boomgroups) # (number of boomgroup, average of tokens per boomgroup)
+		opp_boomloss = board.position_boomloss(opp_boomgroups)
+		opp_sum_boomloss = sum(opp_boomloss.values())
+
+		
+		# weight is positive when the bigger the value the better
+		# weight is negative when the smaller the value the better 
+		features_weights = [[diff, 1], 
+							[my_n_boomgroup, 1] , 
+							[opp_n_boomgroup, -1],
+							[my_boomgroup_avg, -1], 
+							[opp_avg_boomgroup, 1],
+							[my_sum_boomloss, -1],
+							[opp_sum_boomloss, 1]]
+
+
+		# compute evaluation basedd on features and weights
+		eval_value = 0
+		for f_w in features_weights:
+			eval_value += f_w[0]*f_w[1]
+
+		return eval_value
+
+
+		# feature of opp tokens
 
 		# eval_sum = 0
 		# for i in range(8):
@@ -92,19 +140,3 @@ class AI:
 
 		# 				# counts[self.squares[i][j].colour] += self.squares[i][j].size
 		# 	# return counts
-
-		
-		if counts[my_colour] == 0:
-			return -1000
-		elif counts[opp_colour] == 0:
-			return 10000
-
-		else:
-			diff = n_whites - n_blacks
-
-			if player_white:
-				return diff
-				# return eval_sum
-			else:
-				# return -eval_sum
-				return -diff
