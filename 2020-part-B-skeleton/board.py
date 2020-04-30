@@ -53,13 +53,13 @@ class Board:
 			x = w[1]
 			y = w[2]
 			# Fill this square with a white stack
-			squares[x][y] = Stack(x, y, w[0], "white")
+			squares[x][y] = Stack(x, y, w[0], True)
 		
 		for b in blacks:
 			x = b[1]
 			y = b[2]
 			# Fill this square with a black stack
-			squares[x][y] = Stack(x, y, b[0], "black")
+			squares[x][y] = Stack(x, y, b[0], False)
 
 		return Board(squares)
 
@@ -86,15 +86,15 @@ class Board:
 	# The game is over if there are no more tokens of either colour
 	def game_over(self):
 		counts = self.counts()
-		if counts['white'] == 0 or counts['black'] == 0:
+		if counts[True] == 0 or counts[False] == 0:
 			return True
 		return False
 
 	# A dictionary with black and white token counts, for the evaluation function
 	def counts(self): 
 		counts = dict()
-		counts['white'] = 0
-		counts['black'] = 0 
+		counts[True] = 0 # white
+		counts[False] = 0  #  black
 
 		for i in range(8):
 			for j in range(8):
@@ -108,11 +108,10 @@ class Board:
 	* return a list of "colour" stack 
 	"""	
 	def stacks_list(self, colour):
-		colour_str = player_colour(colour)
 		stacks = []
 		for i in range(8):
 			for j in range(8):
-				if self.squares[i][j] != '' and self.squares[i][j].colour == colour_str :
+				if self.squares[i][j] != '' and self.squares[i][j].colour == colour :
 					stacks.append(self.squares[i][j])
 		return stacks
 
@@ -169,7 +168,7 @@ class Board:
 	* goal is to find critical positions
 	* consider only position that link two boomgroup
 	"""
-	def inter_boomgroup(self,boomgroups): # NOT COMPLETE YET
+	def inter_boomgroup(self,boomgroups): # NOT COMPLETE YET, not very useful, use count_boomloss
 		link_positions = 0
 		boomspots = []
 		intergroups = []
@@ -194,9 +193,7 @@ class Board:
 
 			# check intersections with other zones
 			for other in zones_temp:
-				print("other",other)
 				inter = zone & other
-				print("Intersectrion",inter)
 				if inter:
 					# if intersection not already added
 					if (inter) not in intergroups:
@@ -219,7 +216,7 @@ class Board:
 	* goal is to find critical positions
 	* boomloss is number of token loss if boom at this position
 	"""
-	def position_boomLoss(self,boomgroups):
+	def count_boomLoss(self,boomgroups):
 		boomloss_counts = {} # key = position : value = boomloss/number of tokens affected
 
 		# list of boomspots for each group and
@@ -261,7 +258,7 @@ class Board:
 	
 	"""
 	* input: boomloss value dictionnary
-	* return closer stack to postion with largest boomvalue
+	* return closer stack to opponent postion with largest boomvalue
 	* explore this move first for better move ordering
 	"""
 	def best_stack(self, boomloss_dict, colour):
@@ -276,14 +273,17 @@ class Board:
 
 		best_stack = NULL
 		distance = 100
+		avg_dist = 0
 
 		# find closer stack to target
 		for stack in stacks[1:]
 			# manhatan distance
 			distance = (math.abs(stack.x - opp_target[0]) + math.abs(stack.y - opp_target[1]))/stack.size
+			avg_dist += distance
 			if distance < best_distance:
 				best_stack = stack
 
+		avg_dist = avg_dist / len(stacks)
 		return best_stack
 
 
@@ -408,39 +408,6 @@ class Board:
 					return False
 		return True
 
-
-
-
-
-# Evaluation function will depend on what colour we are
-# simple evaluation function 
-def evaluation(board, player_white):
-	# print(board)
-	# squares_to_string(board.squares)
-
-	# feature: number of tokens difference
-	token_counts = board.counts()
-	n_blacks = counts['black']
-	n_whites = counts['white']
-	diff = n_whites - n_blacks
-	if not player_white:
-		 diff = -diff
-
-
-
-	groups = board.boomgroup(player_white)
-
-	# feature: number of group + average number of token per group
-	numGroup, average = board.boomgroup_average(groups)
-
-
-	# feature: boomloss
-	# dictionnary of position:boomloss
-	boomloss_counts = board.position_boomLoss(groups)
-	# TODO average boomloss per position ?
-
-	# TODO assign weight to each feature
-	return diff + numGroup + average
 
 
 # helper function

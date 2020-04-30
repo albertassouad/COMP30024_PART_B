@@ -5,7 +5,7 @@ class Stack:
 		self.y = y
 		# size of the stack
 		self.size = size
-		# colour of the stack - black or white
+		# colour of the stack - True (white) or False (black)
 		self.colour = colour
 		# stack from which this stack originated from
 		self.parent = parent
@@ -35,7 +35,7 @@ class Stack:
 		return new_stacks
 
 	def to_string(self):
-		if self.colour == "white": 
+		if self.colour == True: 
 			c = "w" 
 		else :
 			c = "b"

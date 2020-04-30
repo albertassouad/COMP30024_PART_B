@@ -90,14 +90,14 @@ class AI:
 		# feature of our tokens
 		my_boomgroups = board.boomgroupCalc(player_white)
 		my_n_boomgroup, my_boomgroup_avg = board.boomgroup_average(my_boomgroups) # (number of boomgroup, average of tokens per boomgroup)
-		my_boomloss = board.position_boomloss(my_boomgroups)
-		my_sum_boomloss = sum(my_boomloss.values()) # TODO
+		my_boomloss = board.count_boomloss(my_boomgroups)
+		my_sum_boomloss = sum(my_boomloss.values()) # TODO, elaborate
 
 
 		# feature of opponent tokens
 		opp_boomgroups = board.boomgroupCalc(not player_white)
 		opp_n_boomgroup, opp_avg_boomgroup  = board.boomgroup_average(opp_boomgroups) # (number of boomgroup, average of tokens per boomgroup)
-		opp_boomloss = board.position_boomloss(opp_boomgroups)
+		opp_boomloss = board.count_boomloss(opp_boomgroups)
 		opp_sum_boomloss = sum(opp_boomloss.values())
 
 		
@@ -112,7 +112,7 @@ class AI:
 							[opp_sum_boomloss, 1]]
 
 
-		# compute evaluation basedd on features and weights
+		# compute evaluation based on features and weights
 		eval_value = 0
 		for f_w in features_weights:
 			eval_value += f_w[0]*f_w[1]

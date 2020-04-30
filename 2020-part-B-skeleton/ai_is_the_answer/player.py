@@ -17,7 +17,7 @@ class ExamplePlayer:
         # TODO: Set up state representation.
         colour_bool = True
         if colour == "black": colour_bool = False
-        self.board = Board.new_board(colour_bool)
+        self.board = Board.new_board()
         self.agent = AI(board, colour_bool)
 
 
@@ -45,6 +45,8 @@ class ExamplePlayer:
         
         else: # agent decide move
             chosen_move = agent.best_move()
+
+        return ("MOVE",1,(x,y))
     
     def update(self, colour, action):
         """
