@@ -14,12 +14,56 @@ class Board:
 	def __init__(self, squares):
 		# self.parent = parent
 		self.squares = squares
+		# To shorten the time of iteration keep black and white tokens in lists
+		# white are list of white tokens
+		self.whites = self.get_stacks(True)
+		# list of black tokens
+		self.blacks = self.get_stacks(False)
+		# self.score = self.
+		# difference between white and black stacks
+		# possibly remove
+		# self.whites_minus_blacks = len(self.whites) - len(self.blacks)
+
+	# Allow storage of boards in a priority queue
+	def __lt__(self, other): 
+		return self.whites_minus_blacks < other.whites_minus_blacks
 
 		#self.blacks= 
 		#self.whites =
 
+	# Retrieves stacks of specified colour
+	def get_stacks(self, colour):
+		stacks = [] 
+		for i in range(Board.HEIGHT):
+			for j in range(Board.WIDTH):
+				if self.squares[i][j] != '':
+					if self.squares[i][j].colour == colour:
+						stacks.append(self.squares[i][j])
+		return stacks
+
+	"""
+	TODO: get_stacks and stacks_list are the same
+	* input: color
+	* return a list of "colour" stack 
+	"""	
+	def stacks_list(self, colour):
+		stacks = []
+		for i in range(8):
+			for j in range(8):
+				if self.squares[i][j] != '' and self.squares[i][j].colour == colour :
+					stacks.append(self.squares[i][j])
+		return stacks
+
+
 	# Creates a brand new board with white and black tokes in starting positions
 	def new_board():
+		# blacks = [[1,0,7], [1,1,7],   [1,3,7], [1,4,7],   [1,6,7], [1,7,7],
+  #        			[1,0,6], [1,1,6],   [1,3,6], [1,4,6],   [1,6,6], [1,7,6]]
+
+  #       whites = [[1,0,1], [1,1,1], [1,3,1], [1,4,1], [1,6,1], [1,7,1], [1,0,0], [1,1,0], [1,3,0], [1,4,0], [1,6,0], [1,7,0]]
+
+        # whites = [[1,0,1], [1,1,1],   [1,3,1], [1,4,1],   [1,6,1], [1,7,1],
+        # 			[1,0,0], [1,1,0],   [1,3,0], [1,4,0],   [1,6,0], [1,7,0]]
 		# initial positions of white and black tokens
 		blacks = [[1,0,7], [1,1,7],   [1,3,7], [1,4,7],   [1,6,7], [1,7,7],
          			[1,0,6], [1,1,6],   [1,3,6], [1,4,6],   [1,6,6], [1,7,6]]
@@ -27,34 +71,16 @@ class Board:
 		blacks = [[1,0,1], [1,1,1],   [1,3,1], [1,4,1],   [1,6,1], [1,7,1],
          			[1,0,0], [1,1,0],   [1,3,0], [1,4,0],   [1,6,0], [1,7,0]]
 
-		whites = [[1,0,7], [1,1,7],   [1,3,7], [1,4,7],   [1,6,7], [1,7,7],
-        			[1,0,6], [1,1,6],   [1,3,6], [1,4,6],   [1,6,6], [1,7,6]]
-
-		# blacks = [[1,0,1], [1,1,1],   [1,3,1], [1,4,3],   [1,6,1], [1,7,1],
-  #        			[1,0,0], [1,1,0],   [1,3,0], [1,4,0],   [1,6,0], [1,7,0]]
-
-        	# whites = [[1,0,7], [1,1,7],   [1,3,7], [1,4,7],   [1,6,7], [1,7,7],
-  #        			[1,0,6], [1,1,6],   [1,3,6], [1,4,6],   [1,6,6], [1,7,6]]
-
-		# blacks = [[1,0,1], [1,1,1],   [1,3,1], [1,4,1],   [1,6,1], [1,7,1],
-  #        			[1,0,0], [1,1,0],   [1,3,0], [1,4,0],   [1,6,0], [1,7,0]]
-
-        # Crate empty array to store representation of the board
-		squares = []
-		# Intilize all squares to ''
-		for i in range(Board.HEIGHT):
-			row = []
-			for j in range(Board.HEIGHT):
-				# '' signify squares that are unoccupied by stacks 
-				row.append('')
-			squares.append(row)
-		# Populate squares with stacks
+     
+        # empty board with all squares ''
+		squares = Board.empty_board()
+		# adds white stacks to the
 		for w in whites:
 			x = w[1]
 			y = w[2]
 			# Fill this square with a white stack
 			squares[x][y] = Stack(x, y, w[0], True)
-		
+		# adds black stacks to the board
 		for b in blacks:
 			x = b[1]
 			y = b[2]
@@ -62,7 +88,16 @@ class Board:
 			squares[x][y] = Stack(x, y, b[0], False)
 
 		return Board(squares)
-
+	# function to initialize an empty board
+	def empty_board():
+		squares = []
+		for i in range(Board.HEIGHT):
+			row = []
+			for j in range(Board.HEIGHT):
+				# '' signify squares that are unoccupied by stacks 
+				row.append('')
+			squares.append(row)
+		return squares
 	# def board_to_string(self):
 	# 	for i in range()
 
@@ -74,6 +109,7 @@ class Board:
 			for j in range(Board.WIDTH):
 				# If a stack occupies this square
 				if self.squares[i][j] != '':
+					# print(self.squares[i][j])
 					# Create a copy of the stack that occupies that square
 					row.append(self.squares[i][j].copy_stack())
 				else: 
@@ -86,34 +122,33 @@ class Board:
 	# The game is over if there are no more tokens of either colour
 	def game_over(self):
 		counts = self.counts()
+		# no more tokens of either color - game has won or draw
 		if counts[True] == 0 or counts[False] == 0:
 			return True
+		# If both parties have just 1 token, can only result in a draw
+		elif counts[True] == 1 and counts[False] == 1:
+			return True
+
 		return False
 
 	# A dictionary with black and white token counts, for the evaluation function
 	def counts(self): 
 		counts = dict()
 		counts[True] = 0 # white
-		counts[False] = 0  #  black
+		counts[False] = 0 # black
 
-		for i in range(8):
-			for j in range(8):
-				if self.squares[i][j] != '':
-					# Counts size of stacks
-					counts[self.squares[i][j].colour] += self.squares[i][j].size
+		for stack in self.whites:
+			counts[True] += stack.size
+
+		for stack in self.blacks:
+			counts[False] += stack.size
+
+		# for i in range(8):
+		# 	for j in range(8):
+		# 		if self.squares[i][j] != '':
+		# 			# Counts size of stacks
+		# 			counts[self.squares[i][j].colour] += self.squares[i][j].size
 		return counts
-
-	"""
-	* input: color
-	* return a list of "colour" stack 
-	"""	
-	def stacks_list(self, colour):
-		stacks = []
-		for i in range(8):
-			for j in range(8):
-				if self.squares[i][j] != '' and self.squares[i][j].colour == colour :
-					stacks.append(self.squares[i][j])
-		return stacks
 
 	"""
 	* input: board state and color
@@ -286,8 +321,6 @@ class Board:
 		avg_dist = avg_dist / len(stacks)
 		return best_stack
 
-
-
 	# Takes the new stack generated by a move, and creates a new board with 
 	# that move taken into account
 	def update_board(self, new_stack):
@@ -296,7 +329,6 @@ class Board:
 		new_y = new_stack.y
 		# Size of the new stack
 		tokens_moved = new_stack.size
-		
 		# Copy board just returns the squares of stacks on the board
 		# New squares stores the layout of the old board
 		new_squares = self.copy_squares()
@@ -331,82 +363,162 @@ class Board:
 		# Subtract the number of tokens that were moved from that position stack
 		new_squares[old_x][old_y] = old_position.update_stack(-tokens_moved)
 
-		# Get stacks
-		# stacks = self.get_stacks(new_stacks)
 
-		# return Board(new_stacks)
-		return new_squares
+		return Board(new_squares)
 
-	def boom(self, stack):
-		# Find all coordinates affected by booming this stack
-		coordinates = boomzones.find_boomzones(stack, self.squares)
-		# print(coordinates)
-		# Add the coordinate of the boomed stack
-		# coordinates = coordinates.append((stack.x, stack.y])
-		# Create copy of the board with copies of the Stack objects 
-		new_squares = self.copy_squares()
-		# Remove all stacks (stack -> '') in these coordinates
-		for c in coordinates:
-			# print(c)
-			i = c[0]
-			j = c[1]
-			new_squares[i][j] = ''
-
-		# return Board(new_stacks)
-		return new_squares
 
 	# Create all the possible board arrangements that can result from this board
-	def possible_moves(self, colour):
+	def possible_moves(self, colour, maximizingPlayer):
 		# Use priority queue for possible moves
 		# sorted_moves = []
 		# moves stores child board arrangements
-		boom_moves = []
+		# boom_moves = []
 		moves = []
-		new_stacks = []
+		# heapq.heapify(moves)
+		# every time we generate moves for a board we have empty boomed set
+		boomed = set()
+		# new_stacks = []
 		# All stacks that will be produced by our moves
+		# 
+		if colour == True:
+			stacks_moved = self.whites
+		elif colour == False:
+			stacks_moved = self.blacks
+
+		# Create a list of every resulting board from every move for each stack
+		for stack in stacks_moved: 
+			moves.extend(stack.possible_moves(self, boomed))
+			# for board in stack.possible_moves(self, boomed):
+			# 	heapq.heappush(moves, board)
+
+			# if [stack.x, stack.y] not in boomed:
+			# moves.extend(stack.possible_moves(self, boomed))
+		if maximizingPlayer:
+			moves.sort(key=lambda x: x.evaluation(colour), reverse=True)
+			return moves
+		else:
+			moves.sort(key=lambda x: x.evaluation(colour), reverse=False)
+			return moves
+
+	def flatten(self, reverse=False): 
+		flattened = []
+		if reverse:
+			squares = self.squares[::-1]
+
+		for row in self.squares[::-1]:
+			for entry in row:
+				if entry == '':
+					flattened.append(13)
+				else:
+					flattened.append(entry.flatten())
+		return flattened
+
+
+	def hashkey(self):
+		k1 = 0 
+		k2 = 0
+
+		for x in self.flatten():
+			k1 *= 3
+			k1 += int(x)
+			assert k1 >= 0
+
+		for x in self.flatten(True):
+			k2 *= 3
+			k2 += int(x)
+			assert k2 >= 0
+
+		if k2 < k1:
+			return k2, True
+		else:
+			return k1, False
+
+		# return moves
+
+
+		# if colour == "white":
+		# 	return list(heapq.heapify(moves))
+
+		# elif colour == "black":
+		# 	return moves
+
+
+	# Evaluation function will depend on what colour we are
+	# simple evaluation function 
+	def evaluation(self, player_white):
+		# print(board)
+		# squares_to_string(board.squares)
+
+		# black_eval = 0
+		# white_eval = 0
+		score = 0
+
+		values = [[1,1,1,1,1,1,1,1],
+					[1,1,1,1,1,1,1,1],
+					[2,2,2,2,2,2,2,2],
+					[3,3,3,3,3,3,3,3],
+					[3,3,3,3,3,3,3,3],
+					[2,2,2,2,2,2,2,2],
+					[1,1,1,1,1,1,1,1],
+					[1,1,1,1,1,1,1,1]]
+
+		white_counts = 0
+		black_counts = 0
+
 		for i in range(Board.HEIGHT):
 			for j in range(Board.WIDTH):
 				if self.squares[i][j] != '':
-					if self.squares[i][j].colour == colour:
-						# Adds possible moves from the stack on this square
-						# Moves are in the form of board layouts
-						new_stacks.extend(self.squares[i][j].possible_moves())
-						# Add board layouts that result from detonating given stack
-						boom_moves.append(self.boom(self.squares[i][j]))
-						new_move = self.boom(self.squares[i][j])
-						# Checks if this board layout from given boom move is already in moves 
-						# array
-						if not self.check_added(moves, new_move):
-							moves.append(new_move)
-
-		for stack in new_stacks:
-			# Create a board from each new board layout
-			new_board = self.update_board(stack)
-			# Ignores invalid moves 'None'
-			if new_board != None:
-				# moves array stores all new boards
-				moves.append(new_board)
-		# Adds all new boards from boom_moves after this
-		for new_move in boom_moves:
-			if not self.check_added(moves, new_move):
-					moves.append(new_move)
+					if self.squares[i][j].colour == True:
+						white_counts += 100*self.squares[i][j].size + values[j][i]
+						# score += values[j][i]
+						# score += 10 * self.squares[i][j].size + values[j][i]
+					else:
+						# score -= 10 * self.squares[i][j].size + values[j][i]
+						black_counts += 100*self.squares[i][j].size + values[j][i]
+						# score -= values[j][i]
 
 
-		return moves
+		# score += diff 
+
+		if player_white: 
+			return white_counts - black_counts
+			# return score
+		else:
+			return black_counts - white_counts
+			# return -score
 
 
-	def check_added(self, moves, new_move): 
-		for old_move in moves:
-			if self.check_equality(old_move, new_move):
-				return True
-		return False
 
-	def check_equality(self, old_move, new_move):
-		for i in range(8):
-			for j in range(8):
-				if old_move[i][j] != new_move[i][j]:
-					return False
-		return True
+		# feature of our tokens
+		my_boomgroups = self.boomgroupCalc(player_white)
+		my_n_boomgroup, my_boomgroup_avg = self.boomgroup_average(my_boomgroups) # (number of boomgroup, average of tokens per boomgroup)
+		my_boomloss = self.count_boomloss(my_boomgroups)
+		my_sum_boomloss = sum(my_boomloss.values()) # TODO, elaborate
+
+
+		# feature of opponent tokens
+		opp_boomgroups = self.boomgroupCalc(not player_white)
+		opp_n_boomgroup, opp_avg_boomgroup  = self.boomgroup_average(opp_boomgroups) # (number of boomgroup, average of tokens per boomgroup)
+		opp_boomloss = self.count_boomloss(opp_boomgroups)
+		opp_sum_boomloss = sum(opp_boomloss.values())
+
+		
+		# weight is positive when the bigger the value the better
+		# weight is negative when the smaller the value the better 
+		features_weights = [[diff, 1], 
+							[my_n_boomgroup, 1] , 
+							[opp_n_boomgroup, -1],
+							[my_boomgroup_avg, -1], 
+							[opp_avg_boomgroup, 1],
+							[my_sum_boomloss, -1],
+							[opp_sum_boomloss, 1]]
+
+
+		# compute evaluation based on features and weights
+		eval_value = 0
+		for f_w in features_weights:
+			eval_value += f_w[0]*f_w[1]
+		# return diff
 
 
 
