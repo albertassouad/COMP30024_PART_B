@@ -21,7 +21,7 @@ class AI:
 				global_score = local_score
 				chosen_move = move
 
-		print(global_score)
+		print("EVALUATION == ",global_score)
 
 		return global_score, chosen_move
 

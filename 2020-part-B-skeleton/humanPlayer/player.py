@@ -25,14 +25,14 @@ class ExamplePlayer:
         """
         # TODO: Decide what action to take, and return it
         action_type = input("Enter action type: MOVE or BOOM\n")
-        if action_type == "MOVE":
-            num_of_tokens = int(input("Enter number of tokens to move\n"))
-            initial_position = input("Enter initial token position\n").split()
-            final_position = input("Enter final token position\n").split()
-            return (action_type, num_of_tokens, (int(initial_position[0]), int(initial_position[1])), (int(final_position[0]),int(final_position[1])))
-        else :
-            position = input("Enter boom position\n").split()
-            return (action_type, (int(position[0]),int(position[1])))
+            if action_type == "MOVE":
+                num_of_tokens = int(input("Enter number of tokens to move\n"))
+                initial_position = input("Enter initial token position\n").split()
+                final_position = input("Enter final token position\n").split()
+                return (action_type, num_of_tokens, (int(initial_position[0]), int(initial_position[1])), (int(final_position[0]),int(final_position[1])))
+            else :
+                position = input("Enter boom position\n").split()
+                return (action_type, (int(position[0]),int(position[1])))
 
     def update(self, colour, action):
         """

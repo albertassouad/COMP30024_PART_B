@@ -1,5 +1,7 @@
 
 from board import Board
+from board import Stack
+from board import squares_to_string
 import random
 class ExamplePlayer:
     def __init__(self, colour):
@@ -15,6 +17,9 @@ class ExamplePlayer:
         """
         # TODO: Set up state representation.
 
+        colour_bool = True
+        if colour == "black": colour_bool = False
+        self.colour = colour_bool
         self.board = Board.new_board()
 
 
@@ -29,11 +34,14 @@ class ExamplePlayer:
         """
         # TODO: Decide what action to take, and return it
         board = self.board
-        tokens = self.get_stacks(player_colour(True)) # list of stack of same color, now white
-        token = tokens[random.randint(0, len(tokens) - 1)]
-        move = token.moves()[random.randint(0, len(token.moves()) - 1)] # only "MOVE" move, no boom
-        return ('MOVE', 1, (token.x, token.y), (move.x,move.y))
-
+        moves = board.possible_moves(self.colour, True)
+        
+        chosen_move = moves[random.randint(0, len(moves) - 1)]
+        if chosen_move.boom_at == None: # it is "MOVE"
+            return ("MOVE", chosen_move.to_.size, (chosen_move.from_.x, chosen_move.from_.y), (chosen_move.to_.x,chosen_move.to_.y))
+        else: # it is "BOOM"
+            return ("BOOM", (chosen_move.boom_at[0], chosen_move.boom_at[1])) # boom_at is a tuple
+        
     def update(self, colour, action):
         """
         This method is called at the end of every turn (including your player’s 
@@ -53,12 +61,14 @@ class ExamplePlayer:
         against the game rules).
         """
         # TODO: Update state representation in response to action.
-        print(action)
-        self.board.update(action[3][0], action[3][1], action[1])
+        colour_bool = True
+        if colour == "black": colour_bool = False
+        
+        if action[0] == "BOOM":
+            new_stack = Stack(action[1][0], action[1][1], 1, colour_bool)
+            self.board = new_stack.boom(self.board)
+        else:
+            parent_stack = self.board.squares[action[2][0]][action[2][1]]
+            new_stack = Stack(action[3][0], action[3][1], action[1], colour_bool, parent = parent_stack)
+            self.board = self.board.update_board(new_stack) # board update to stack move
 
-
-blacks_init = [(0,7), (1,7),   (3,7), (4,7),   (6,7), (7,7),
-               (0,6), (1,6),   (3,6), (4,6),   (6,6), (7,6)]
-
-whites_init = [(0,1), (1,1),   (3,1), (4,1),   (6,1), (7,1),
-                (0,0), (1,0),   (3,0), (4,0),   (6,0), (7,0)]

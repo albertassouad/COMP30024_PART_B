@@ -1,6 +1,9 @@
 import copy
-# from stack import Stack
 import boomzones
+import math
+from itertools import count
+
+
 
 #Class that represents the board
 # The board is the state
@@ -9,12 +12,14 @@ class Board:
 	# dimension of a board
 	HEIGHT = 8
 	WIDTH = 8
+	_ids = count(0) # count number of boards
 
 
 	# A board is initialized with the squares it consists of
 	# These squares may be unoccupied, occupied by a stack of black tokens, or occupied by a stack 
 	# of white tokens
 	def __init__(self, squares, to_=None, from_=None, boom_at=None):
+		self.id = next(self._ids)
 		# self.parent = parent
 		self.squares = squares
 		# This operation is only performed once when board is initialized
@@ -38,6 +43,17 @@ class Board:
 					token_count += self.squares[i][j].size
 		
 		return stack_list, token_count
+
+	# return lkist of stack of same colour
+	def get_stacks_1colour(self, token_colour):
+		stack_list = [] 
+		token_count = 0
+		for i in range(Board.HEIGHT):
+			for j in range(Board.WIDTH):
+				if self.squares[i][j] != '' and self.squares[i][j].player_white == token_colour:
+					stack_list.append(self.squares[i][j])
+		
+		return stack_list
 	
 	# vector of piece counts
 	#[#whites, #blacks]
@@ -202,7 +218,7 @@ class Board:
 	* a boomgroup is formed by adjacent neighboors
 	"""
 	def boomgroupCalc(self, player_white):
-		tokens = self.get_stacks(player_white) # list of stack of same color
+		tokens = self.get_stacks_1colour(player_white) # list of stack of same color
 		done = set()
 		groups = []
 		for stack in tokens:
@@ -251,7 +267,7 @@ class Board:
 	* goal is to find critical positions
 	* boomloss is number of token loss if boom at this position
 	"""
-	def count_boomLoss(self,boomgroups):
+	def count_boomloss(self,boomgroups):
 		boomloss_counts = {} # key = position : value = boomloss/number of tokens affected
 
 		# list of boomspots for each group and
@@ -265,7 +281,7 @@ class Board:
 				boomloss += stack.size
 
 			for position in boomspot:
-				if position not in link_counts: # if key is not in dictionary
+				if position not in boomloss_counts: # if key is not in dictionary
 					boomloss_counts.setdefault(position, boomloss)
 				else: boomloss_counts[position] += boomloss
 
@@ -285,7 +301,7 @@ class Board:
 		for i in range(x-1, x+2):
 				for j in range(y-1, y+2):
 					# spot has to be on board and (empty or another colour)
-					if (stack.onboard(i,j) and (self.squares[i][j] == '' or board.squares[i][j].colour != stack.colour)):
+					if (stack.onboard(i,j) and (self.squares[i][j] == '' or self.squares[i][j].player_white != stack.player_white)):
 						spots.add((i,j))
 
 		return spots
@@ -304,7 +320,7 @@ class Board:
 		opp_target = max(boomloss_dict, key=boomloss_dict.get) 
 
 
-		stacks = self.get_stacks(colour)
+		stacks = self.get_stacks_1colour(player_white) # list of stack of same color
 
 		best_stack = NULL
 		distance = 100
@@ -374,38 +390,51 @@ class Board:
 			elif s.player_white == False:
 				# black_counts += 100*s.size + black_values[y][x]*s.size
 				black_counts += 100*s.size + values[y][x]
-
-
+		print("\n\n\n\n\n")
+		print("BOARDS EVALUATED", self.id)
 		if player_white == True:
-			return (white_counts - black_counts)
+			diff = (white_counts - black_counts)
+			if black_counts == 0: return 1000
 			# return white_counts - black_counts
 		elif player_white == False:
-			return (black_counts - white_counts)
+			diff = (black_counts - white_counts)
+			if white_counts == 0: return 1000
 
 
-		# # feature of our tokens
-		# my_boomgroups = self.boomgroupCalc(player_white)
-		# my_boomloss = self.count_boomloss(my_boomgroups)
-		# my_avg_boomloss = sum(my_boomloss.values()) / len(my_boomloss) # average of boomloss values
 
 
-		# # feature of opponent tokens
-		# opp_boomgroups = self.boomgroupCalc(not player_white)
-		# opp_boomloss = self.count_boomloss(opp_boomgroups)
-		# opp_avg_boomloss = sum(opp_boomloss.values()) / len(opp_boomloss)
+		# feature of our tokens
+		my_boomgroups = self.boomgroupCalc(player_white)
+		my_boomloss = self.count_boomloss(my_boomgroups)
+		print("\n\n\n\n\n")
+		squares_to_string(self.squares)
+		print("\n\n")
+		print("MY BOOMLOSS", my_boomloss)
+		my_avg_boomloss = sum(my_boomloss.values()) / len(my_boomloss) # average of boomloss values
+
+
+		# feature of opponent tokens
+		opp_boomgroups = self.boomgroupCalc(not player_white)
+		opp_boomloss = self.count_boomloss(opp_boomgroups)
+		print("\n\n")
+		print("OPP BOOMLOSS", opp_boomloss)
+		print("\n\n")
+		opp_avg_boomloss = sum(opp_boomloss.values()) / len(opp_boomloss)
 
 		
-		# # weight is positive when the bigger the value the better
-		# # weight is negative when the smaller the value the better 
-		# features_weights = [[diff, 1],
-		# 					[my_avg_boomloss, -1],
-		# 					[opp_avg_boomloss, 1]]
+		# weight is positive when the bigger the value the better
+		# weight is negative when the smaller the value the better 
+		features_weights = [[diff, 1],
+							[my_avg_boomloss, -1],
+							[opp_avg_boomloss, 1]]
 
 
-		# # compute evaluation based on features and weights
-		# eval_value = 0
-		# for f_w in features_weights:
-		# 	eval_value += f_w[0]*f_w[1]
+		# compute evaluation based on features and weights
+		eval_value = 0
+		for f_w in features_weights:
+			eval_value += f_w[0]*f_w[1]
+
+		return eval_value
 
 	def outcome(self): 
 		white_count = 0
@@ -426,6 +455,8 @@ class Board:
 			return -1
 		else:
 			return None
+
+
 
 class Stack: 
 	def __init__(self, x, y, size, player_white, parent=None):
@@ -475,11 +506,12 @@ class Stack:
 		return str(self.size) + "," + colour
 
 
-	def boom(self, board, boomed = None):
+	def boom(self, board, boomed = None): # boomed = None when boom() is called from player class to update board
 		# Find all coordinates affected by booming this stack
 		coordinates = boomzones.find_boomzones(self, board.squares)
 		# Add affected coordinate to boomed
-		boomed.update(coordinates)
+		if boomed != None:
+			boomed.update(coordinates)
 		# Create copy of the board with copies of the Stack objects 
 		new_squares = board.copy_squares()
 		# Remove all stacks (stack -> '') in these coordinates
@@ -635,6 +667,25 @@ def squares_to_string(squares):
 		print(row)
 
 
+testboard = Board.new_board()
+player_white = True
 
+# boom
+new_stack = Stack(6, 6, 1, False)
+testboard = new_stack.boom(testboard)
 
+my_boomgroups = testboard.boomgroupCalc(player_white)
+# print("my_boomgroups", my_boomgroups)
+print("\n\n")
+squares_to_string(testboard.squares)
+print("\n\n")
+my_boomloss = testboard.count_boomloss(my_boomgroups)
+print("my_boomloss", my_boomloss )
+print("My avg boomloss", sum(my_boomloss.values()) / len(my_boomloss))
 
+opp_boomgroups = testboard.boomgroupCalc(not player_white)
+# print("opp_boomgroups", opp_boomgroups)
+print("\n\n")
+opp_boomloss = testboard.count_boomloss(opp_boomgroups)
+print("opp_boomloss", opp_boomloss )
+print("Opp avg boomloss", sum(opp_boomloss.values()) / len(opp_boomloss)) 

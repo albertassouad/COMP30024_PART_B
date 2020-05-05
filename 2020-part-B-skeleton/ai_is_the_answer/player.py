@@ -1,6 +1,7 @@
 
 from board import Board
 from board import Stack
+from board import squares_to_string
 from ai_class import AI
 import random
 class ExamplePlayer:
@@ -32,27 +33,14 @@ class ExamplePlayer:
         represented based on the spec's instructions for representing actions.
         """
         # TODO: Decide what action to take, and return it
-
-
-        # user decide move
-        userPlay = input("Type 'human' or 'agent' \n")
-        if userPlay == "user": 
-            action_type = input("Enter action type: MOVE or BOOM\n")
-            if action_type == "MOVE":
-                num_of_tokens = int(input("Enter number of tokens to move\n"))
-                initial_position = input("Enter initial token position\n").split()
-                final_position = input("Enter final token position\n").split()
-                return (action_type, num_of_tokens, (int(initial_position[0]), int(initial_position[1])), (int(final_position[0]),int(final_position[1])))
-            else :
-                position = input("Enter boom position\n").split()
-                return (action_type, (int(position[0]),int(position[1])))
         
-        else: # agent decide move
-            chosen_move = self.agent.best_move()[1]
-            if chosen_move.boom_at == None: # it is "MOVE"
-                return ("MOVE", chosen_move.to_.size, (chosen_move.from_.x, chosen_move.from_.y), (chosen_move.to_.x,chosen_move.to_.y))
-            else: # it is "BOOM"
-                return ("BOOM", (boom_at.x, boom_at.y))
+        # agent decide move
+        # action_type = input("TAKE A BREATHER\n")
+        chosen_move = self.agent.best_move()[1]
+        if chosen_move.boom_at == None: # it is "MOVE"
+            return ("MOVE", chosen_move.to_.size, (chosen_move.from_.x, chosen_move.from_.y), (chosen_move.to_.x,chosen_move.to_.y))
+        else: # it is "BOOM"
+            return ("BOOM", (chosen_move.boom_at[0], chosen_move.boom_at[1])) # boom_at is a tuple
 
         
     
@@ -77,13 +65,14 @@ class ExamplePlayer:
         # TODO: Update state representation in response to action.
         colour_bool = True
         if colour == "black": colour_bool = False
-
-        print("action returned",action)
         if action[0] == "BOOM":
-            new_stack = Stack(action[3][0], action[3][1], 1, colour_bool)
-            self.board = new_stack.boom(new_stack) # board update to boom move
+            new_stack = Stack(action[1][0], action[1][1], 1, colour_bool)
+            self.board = new_stack.boom(self.board) # board update to boom move
+            self.agent.board = self.board
         else:
             parent_stack = self.board.squares[action[2][0]][action[2][1]]
             new_stack = Stack(action[3][0], action[3][1], action[1], colour_bool, parent = parent_stack)
             self.board = self.board.update_board(new_stack) # board update to stack move
+            self.agent.board = self.board
+        
         
