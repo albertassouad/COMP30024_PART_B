@@ -35,7 +35,7 @@ class ExamplePlayer:
 
 
         # user decide move
-        userPlay = input("user or agent ?\n")
+        userPlay = input("Type 'human' or 'agent' \n")
         if userPlay == "user": 
             action_type = input("Enter action type: MOVE or BOOM\n")
             if action_type == "MOVE":
