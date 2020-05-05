@@ -29,7 +29,7 @@ class ExamplePlayer:
         """
         # TODO: Decide what action to take, and return it
         board = self.board
-        tokens = self.stacks_list(player_colour(True)) # list of stack of same color, now white
+        tokens = self.get_stacks(player_colour(True)) # list of stack of same color, now white
         token = tokens[random.randint(0, len(tokens) - 1)]
         move = token.moves()[random.randint(0, len(token.moves()) - 1)] # only "MOVE" move, no boom
         return ('MOVE', 1, (token.x, token.y), (move.x,move.y))
