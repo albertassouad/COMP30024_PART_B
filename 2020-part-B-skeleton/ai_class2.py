@@ -20,6 +20,7 @@ class AI:
 		else:
 			return 1
 
+
 	def best_move(self):
 		
 		alpha = -1000000
@@ -27,12 +28,19 @@ class AI:
 		global_score = -1000000
 
 		self.turn += 1
-		print("I AM AI 1111")
+		print("I AM AI 2222")
 		print("Turn == ", self.turn)
 		
 
+
+		# tic = time.perf_counter()
+
 		possible_moves = self.board.possible_moves(self.player_white, maximizingPlayer=True)
+		# tic = time.perf_counter() - tic 
+
+		# print("possible_moves returned in ",tic)
 		
+		# tic = time.perf_counter()
 		for move in possible_moves:
 
 			
@@ -41,7 +49,11 @@ class AI:
 			if local_score >= global_score: 
 				global_score = local_score
 				chosen_move = move
-	
+		# tic = time.perf_counter() - tic 
+
+		# print("Best move returned in ",tic)
+		# print("EVALUATION == ",global_score)
+		# print("TURN == ", self.turn)
 		return global_score, chosen_move
 
 	def minimax(self, board, depth, player_white, alpha, beta, maximizingPlayer):

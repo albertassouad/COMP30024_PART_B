@@ -1,4 +1,9 @@
 
+from board2 import Board
+from board2 import Stack
+from board2 import squares_to_string
+from ai_class2 import AI
+import random
 class ExamplePlayer:
     def __init__(self, colour):
         """
@@ -12,6 +17,10 @@ class ExamplePlayer:
         strings "white" or "black" correspondingly.
         """
         # TODO: Set up state representation.
+        colour_bool = True
+        if colour == "black": colour_bool = False
+        self.board = Board.new_board()
+        self.agent = AI(self.board, player_white = colour_bool, depth = 2)
 
 
     def action(self):
@@ -24,16 +33,19 @@ class ExamplePlayer:
         represented based on the spec's instructions for representing actions.
         """
         # TODO: Decide what action to take, and return it
-        action_type = input("Enter action type: MOVE or BOOM\n")
-        if action_type == "MOVE" or action_type == "move" :
-            num_of_tokens = int(input("Enter number of tokens to move\n"))
-            initial_position = input("Enter initial token position\n").split()
-            final_position = input("Enter final token position\n").split()
-            return ("MOVE", num_of_tokens, (int(initial_position[0]), int(initial_position[1])), (int(final_position[0]),int(final_position[1])))
-        else :
-            position = input("Enter boom position\n").split()
-            return ("BOOM", (int(position[0]),int(position[1])))
+        
+        # agent decide move
+        
 
+        chosen_move = self.agent.best_move()[1]
+
+        if chosen_move.boom_at == None: # it is "MOVE"
+            return ("MOVE", chosen_move.to_.size, (chosen_move.from_.x, chosen_move.from_.y), (chosen_move.to_.x,chosen_move.to_.y))
+        else: # it is "BOOM"
+            return ("BOOM", (chosen_move.boom_at[0], chosen_move.boom_at[1])) # boom_at is a tuple
+
+        
+    
     def update(self, colour, action):
         """
         This method is called at the end of every turn (including your player’s 
@@ -53,3 +65,16 @@ class ExamplePlayer:
         against the game rules).
         """
         # TODO: Update state representation in response to action.
+        colour_bool = True
+        if colour == "black": colour_bool = False
+        if action[0] == "BOOM":
+            new_stack = Stack(action[1][0], action[1][1], 1, colour_bool)
+            self.board = new_stack.boom(self.board) # board update to boom move
+            self.agent.board = self.board
+        else:
+            parent_stack = self.board.squares[action[2][0]][action[2][1]]
+            new_stack = Stack(action[3][0], action[3][1], action[1], colour_bool, parent = parent_stack)
+            self.board = self.board.update_board(new_stack) # board update to stack move
+            self.agent.board = self.board
+        
+        
