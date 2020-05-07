@@ -36,7 +36,9 @@ class ExamplePlayer:
         
         # agent decide move
         # action_type = input("TAKE A BREATHER\n")
+        print("ACTION ASKED")
         chosen_move = self.agent.best_move()[1]
+        print("ACTION Returned")
         if chosen_move.boom_at == None: # it is "MOVE"
             return ("MOVE", chosen_move.to_.size, (chosen_move.from_.x, chosen_move.from_.y), (chosen_move.to_.x,chosen_move.to_.y))
         else: # it is "BOOM"

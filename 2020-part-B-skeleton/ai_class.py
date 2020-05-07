@@ -1,3 +1,4 @@
+import time
 class AI:
 
 	def __init__(self, board, player_white, depth):
@@ -6,23 +7,57 @@ class AI:
 		# initialize whether the player is white or not
 		self.player_white = player_white
 		self.depth = depth
+		self.turn = 0
 	
 	def best_move(self):
-	
+		
 		alpha = -1000000
 		beta = 1000000
 		global_score = -1000000
 
-		for move in self.board.possible_moves(self.player_white, maximizingPlayer=True):
+		self.turn += 1
+		
+		# depth depenjds opn number of turns
+		# if self.turn < 5: 
+		# 	self.depth = 1
+		# else: 	
+		# 	self.depth = 2 
+
+		# depth depends on number of tokens
+		# white_token_count = 0
+		# black_token_count = 0
+		# for stack in self.board.stack_list:
+
+		# 	if stack.player_white: white_token_count += 1
+		# 	else: black_token_count += 1
+
+		# if self.player_white and black_token_count < 5:
+		# 	self.depth = 3
+		# if not self.player_white and white_token_count < 5:
+		# 	self.depth = 3
+
+
+		tic = time.perf_counter()
+
+		possible_moves = self.board.possible_moves(self.player_white, maximizingPlayer=True)
+		tic = time.perf_counter() - tic 
+
+		print("possible_moves returned in ",tic)
+		
+		tic = time.perf_counter()
+		for move in possible_moves:
+
 			
 			local_score = self.minimax(move, self.depth, self.player_white, alpha, beta, False)
 
 			if local_score >= global_score: 
 				global_score = local_score
 				chosen_move = move
+		tic = time.perf_counter() - tic 
 
+		print("Best move returned in ",tic)
 		print("EVALUATION == ",global_score)
-
+		print("TURN == ", self.turn)
 		return global_score, chosen_move
 
 	def minimax(self, board, depth, player_white, alpha, beta, maximizingPlayer):

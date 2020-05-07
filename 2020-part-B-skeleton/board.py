@@ -200,11 +200,9 @@ class Board:
 		# return moves in descending order if maximizing player - consider best moves first
 		# return moves in ascending order if minimizing player - consider worst moves first
 		if maximizingPlayer:
-			# moves.sort(key=lambda x: x.evaluation(player_white), reverse=True)
 			moves.sort(key=lambda x: x.evaluation(player_white), reverse=True)
 			return moves
 		else:
-			# moves.sort(key=lambda x: x.evaluation(player_white), reverse=False)
 			moves.sort(key=lambda x: x.evaluation(player_white), reverse=False)
 
 			return moves
@@ -306,6 +304,46 @@ class Board:
 
 		return spots
 
+	# def new_feature(self, player_white):
+
+	# 	stacks = self.get_stacks_1colour(player_white) # list of stack of same color
+	# 	best_stack = None
+	# 	max_count = 0
+
+
+	# 	for stack in stacks:
+	# 		count = 0
+	# 		coordinates = stack.boomSpotCalc(stack)
+	# 		for coordinate in coordinates:
+	# 			if self.squares[coordinate[0]][coordinate[1]] != '' and self.squares[coordinate[0]][coordinate[1]].colour == not player_white:
+	# 				count += self.squares[coordinate[0]][coordinate[1]].size
+
+	# 		if count > max_count:
+	# 			best_stack = stack
+
+
+	# 	return best_stack
+
+
+	def y_diff(self):
+		
+
+		max_white = 0
+		min_black = 8
+
+		for stack in self.stack_list:
+			if stack.player_white:
+				if stack.y > max_white:
+					max_white = stack.y
+			else:
+				if stack.y < min_black:
+					min_black = stack.y
+
+		return abs(max_white - min_black)
+
+		 
+
+
 	
 	"""
 	* input: boomloss value dictionnary
@@ -363,7 +401,6 @@ class Board:
 		# 			[-1,0.5,0.5,0.5,0.5,0.5,0.5,-1],
 		# 			[-2,-1,-1,-1,-1,-1,-1,-2]]
 
-
 		values = [[0,0,0,0,0,0,0,0],
 					[1,1,1,1,1,1,1,1],
 					[2,2,2,2,2,2,2,2],
@@ -373,8 +410,49 @@ class Board:
 					[1,1,1,1,1,1,1,1],
 					[0,0,0,0,0,0,0,0]]
 
+		white_values = [[0,0,0,0,0,0,0,0],
+						[1,1,1,1,1,1,1,1],
+						[2,2,2,2,2,2,2,2],
+						[3,3,3,3,3,3,3,3],
+						[4,4,4,4,4,4,4,4],
+						[5,5,5,5,5,5,5,5],	
+						[6,6,6,6,6,6,6,6],
+						[7,7,7,7,7,7,7,7]]
+
+		black_values = [[7,7,7,7,7,7,7,7],
+						[6,6,6,6,6,6,6,6],
+						[5,5,5,5,5,5,5,5],					
+						[4,4,4,4,4,4,4,4],					
+						[3,3,3,3,3,3,3,3],					
+						[2,2,2,2,2,2,2,2],					
+						[1,1,1,1,1,1,1,1],					
+						[0,0,0,0,0,0,0,0]]
+
 		white_counts = 0
 		black_counts = 0
+
+
+		# good thing
+		black_column_dict = {}
+		black_row_dict = {}
+		white_column_dict = {}
+		white_row_dict = {}
+
+
+		for i in range(8):
+			black_column_dict[i] = 1
+			black_row_dict[i] = 1
+			white_column_dict[i] = 1
+			white_row_dict[i] = 1
+
+		for stack in self.stack_list:
+			if stack.player_white:
+				white_column_dict[stack.x] +=  stack.size
+				white_row_dict[stack.y] += stack.size
+			else:
+				black_column_dict[stack.x] +=  stack.size
+				black_row_dict[stack.y] += stack.size
+
 
 		# feature_vector = self.vector_form()
 
@@ -384,57 +462,57 @@ class Board:
 			# if s.player_white == "white":
 			if s.player_white == True:
 				#for each token we
-				# white_counts += 100*s.size + white_values[y][x]*s.size
-				white_counts += 100*s.size + values[y][x]
+				#white_counts += 100*s.size + white_values[y][x]
+				white_counts += 100*s.size +  values[y][x] #+ black_column_dict[x]*black_row_dict[y]
 
 			elif s.player_white == False:
 				# black_counts += 100*s.size + black_values[y][x]*s.size
-				black_counts += 100*s.size + values[y][x]
-		print("\n\n\n\n\n")
-		print("BOARDS EVALUATED", self.id)
+				black_counts += 100*s.size + values[y][x] #+ white_column_dict[x]*white_row_dict[y]
+		
+
 		if player_white == True:
-			diff = (white_counts - black_counts)
-			if black_counts == 0: return 1000
-			# return white_counts - black_counts
+			diff =  (white_counts - black_counts) - self.y_diff()
+
 		elif player_white == False:
-			diff = (black_counts - white_counts)
-			if white_counts == 0: return 1000
+			diff =  (black_counts - white_counts) - self.y_diff()
+
+		return diff
 
 
 
 
-		# feature of our tokens
-		my_boomgroups = self.boomgroupCalc(player_white)
-		my_boomloss = self.count_boomloss(my_boomgroups)
-		print("\n\n\n\n\n")
-		squares_to_string(self.squares)
-		print("\n\n")
-		print("MY BOOMLOSS", my_boomloss)
-		my_avg_boomloss = sum(my_boomloss.values()) / len(my_boomloss) # average of boomloss values
+		# # feature of our tokens
+		# my_boomgroups = self.boomgroupCalc(player_white)
+		# my_boomloss = self.count_boomloss(my_boomgroups)
+		# print("\n\n\n\n\n")
+		# squares_to_string(self.squares)
+		# print("\n\n")
+		# print("MY BOOMLOSS", my_boomloss)
+		# my_avg_boomloss = sum(my_boomloss.values()) / len(my_boomloss) # average of boomloss values
 
 
-		# feature of opponent tokens
-		opp_boomgroups = self.boomgroupCalc(not player_white)
-		opp_boomloss = self.count_boomloss(opp_boomgroups)
-		print("\n\n")
-		print("OPP BOOMLOSS", opp_boomloss)
-		print("\n\n")
-		opp_avg_boomloss = sum(opp_boomloss.values()) / len(opp_boomloss)
+		# # feature of opponent tokens
+		# opp_boomgroups = self.boomgroupCalc(not player_white)
+		# opp_boomloss = self.count_boomloss(opp_boomgroups)
+		# print("\n\n")
+		# print("OPP BOOMLOSS", opp_boomloss)
+		# print("\n\n")
+		# opp_avg_boomloss = sum(opp_boomloss.values()) / len(opp_boomloss)
 
 		
-		# weight is positive when the bigger the value the better
-		# weight is negative when the smaller the value the better 
-		features_weights = [[diff, 1],
-							[my_avg_boomloss, -1],
-							[opp_avg_boomloss, 1]]
+		# # weight is positive when the bigger the value the better
+		# # weight is negative when the smaller the value the better 
+		# features_weights = [[diff, 1],
+		# 					[my_avg_boomloss, -1],
+		# 					[opp_avg_boomloss, 1]]
 
 
-		# compute evaluation based on features and weights
-		eval_value = 0
-		for f_w in features_weights:
-			eval_value += f_w[0]*f_w[1]
+		# # compute evaluation based on features and weights
+		# eval_value = 0
+		# for f_w in features_weights:
+		# 	eval_value += f_w[0]*f_w[1]
 
-		return eval_value
+		# return eval_value
 
 	def outcome(self): 
 		white_count = 0
@@ -667,25 +745,25 @@ def squares_to_string(squares):
 		print(row)
 
 
-testboard = Board.new_board()
-player_white = True
+# testboard = Board.new_board()
+# player_white = True
 
-# boom
-new_stack = Stack(6, 6, 1, False)
-testboard = new_stack.boom(testboard)
+# # boom
+# new_stack = Stack(6, 6, 1, False)
+# testboard = new_stack.boom(testboard)
 
-my_boomgroups = testboard.boomgroupCalc(player_white)
-# print("my_boomgroups", my_boomgroups)
-print("\n\n")
-squares_to_string(testboard.squares)
-print("\n\n")
-my_boomloss = testboard.count_boomloss(my_boomgroups)
-print("my_boomloss", my_boomloss )
-print("My avg boomloss", sum(my_boomloss.values()) / len(my_boomloss))
+# my_boomgroups = testboard.boomgroupCalc(player_white)
+# # print("my_boomgroups", my_boomgroups)
+# print("\n\n")
+# squares_to_string(testboard.squares)
+# print("\n\n")
+# my_boomloss = testboard.count_boomloss(my_boomgroups)
+# print("my_boomloss", my_boomloss )
+# print("My avg boomloss", sum(my_boomloss.values()) / len(my_boomloss))
 
-opp_boomgroups = testboard.boomgroupCalc(not player_white)
-# print("opp_boomgroups", opp_boomgroups)
-print("\n\n")
-opp_boomloss = testboard.count_boomloss(opp_boomgroups)
-print("opp_boomloss", opp_boomloss )
-print("Opp avg boomloss", sum(opp_boomloss.values()) / len(opp_boomloss)) 
+# opp_boomgroups = testboard.boomgroupCalc(not player_white)
+# # print("opp_boomgroups", opp_boomgroups)
+# print("\n\n")
+# opp_boomloss = testboard.count_boomloss(opp_boomgroups)
+# print("opp_boomloss", opp_boomloss )
+# print("Opp avg boomloss", sum(opp_boomloss.values()) / len(opp_boomloss)) 
