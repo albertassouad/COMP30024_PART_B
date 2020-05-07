@@ -61,9 +61,7 @@ def neighbours(self, stack):
 		n_blacks = 0
 
 		for s in self.stack_list:
-			# print(s.player_white)
 			n = self.neighbours(s)
-			# neighbour_dict[s] = n
 			if s.player_white:
 				n_whites += s.size
 				white_neighbours += n
@@ -97,40 +95,11 @@ def neighbours(self, stack):
 			black_score = 100000000000000000
 		else:
 			for s in self.stack_list: 
-				# x = s.x
-				# y = s.y
-				# minimum_black =
-				# if s.player_white == "white":
+
 				if s.player_white == True:
 					white_dist += self.manhattan(s, best_black)
-
-					# white_score += 100*s.size + values[y][x]
-					# white_score += 100*s.size + white_values[y][x]*s.size
-					# best_white = self.neighburs
-					# current_neighbours = self.neighburs(s)
-					# white_score += 1000*s.size + values[y][x]*s.size - self.neighbours(s)
-					# white_score += 1000*s.size + values[y][x] - self.neighbours(s)
-
-					# white_score += 1000*s.size + values[y][x] - neighbour_dict[s] - self.manhattan(s, best_black)/self.token_count + white_moves
-					# white_score += 1000*s.size - neighbour_dict[s] - self.manhattan(s, best_black)/self.token_count + white_moves
-					
-					# DISTANCE OF EACH WHITE STACK TO THE HIGHEST DENSITY BLACK STACK
-
-					# print(self.manhattan(s, best_black))
-					# white_score += 100*s.size + self.manhattan(s, best_black)
-
 				elif s.player_white == False:
 					black_dist += self.manhattan(s, best_white)
-					# black_score += 100*s.size 
-					# current_neighbours = self.neighburs(s)
-					# black_score += 1000*s.size + values[y][x] - self.neighbours(s)
-					# if best_white == None:
-					# 	print ("here")
-					# black_score += 1000*s.size - neighbour_dict[s] - self.manhattan(s, best_white)/self.token_count + black_moves
-					
-					# DISTANCE OF EACH BLACK STACK TO THE HIGHEST DENSITY WHITE STACK
-
-					# print(self.manhattan(s, best_black))
 
 			white_score += 1000*n_whites
 			black_score += 1000*n_blacks
