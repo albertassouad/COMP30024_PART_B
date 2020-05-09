@@ -381,8 +381,6 @@ class Board:
 
 	def evaluation(self, player_white):
 
-		return random.randint(0, 200)
-
 		values = [[0,0,0,0,0,0,0,0],
 					[1,1,1,1,1,1,1,1],
 					[2,2,2,2,2,2,2,2],
@@ -391,34 +389,6 @@ class Board:
 					[2,2,2,2,2,2,2,2],
 					[1,1,1,1,1,1,1,1],
 					[0,0,0,0,0,0,0,0]]
-
-		mobility_values = [[3,3,3,3,3,3,3,3],
-							[3,4,4,4,4,4,4,3],
-							[3,4,5,5,5,5,4,3],
-							[3,4,5,6,6,5,4,3],
-							[3,4,5,6,6,5,4,3],
-							[3,4,5,5,5,5,4,3],
-							[3,4,4,4,4,4,4,3],
-							[3,3,3,3,3,3,3,3]]
-
-		black_column_dict = {}
-		black_row_dict = {}
-		white_column_dict = {}
-		white_row_dict = {}
-		
-		for i in range(8):
-			black_column_dict[i] = 1
-			black_row_dict[i] = 1
-			white_column_dict[i] = 1
-			white_row_dict[i] = 1
-
-		for stack in self.stack_list:
-			if stack.player_white:
-				white_column_dict[stack.x] +=  stack.size
-				white_row_dict[stack.y] += stack.size
-			else:
-				black_column_dict[stack.x] +=  stack.size
-				black_row_dict[stack.y] += stack.size
 
 		white_score = 0 
 		black_score = 0
@@ -446,20 +416,15 @@ class Board:
 			if s.player_white:
 				n_whites += s.size
 				white_neighbours += n
-
 				if best_white == None:
 					best_white = s
-
 				if n >= max_white:
 					max_white = n
 					best_white = s
 				if s.size == 1:
-					white_mobility += mobility_values[s.y][s.y]
+					white_moves += s.size*values[s.y][s.x] 
 				else:
-					white_mobility += mobility_values[s.y][s.y]*2
-					
-
-				# white_value += 2 * black_column_dict[s.x]*black_row_dict[s.y]*3 
+					white_moves += 2 * values[s.y][s.x]
 			else:
 				n_blacks += s.size
 				black_neighbours += n
@@ -468,15 +433,11 @@ class Board:
 				if n >= max_black:
 					max_black = n
 					best_black = s
-
 				if s.size == 1:
-					black_mobility += mobility_values[s.y][s.y]
+					black_moves += s.size*values[s.y][s.x]
 				else:
-					black_mobility += mobility_values[s.y][s.y]*2
+					black_moves +=  2 * values[s.y][s.x] 
 
-				
-				# black_value += s.size*white_column_dict[s.x]*white_row_dict[s.y]*3 # CHANGE s.size*values[s.y][s.x]
-	
 		if n_whites == 0 and n_blacks == 0:
 			white_score = 0
 			black_score = 0
@@ -501,25 +462,9 @@ class Board:
 			white_score += white_moves
 			black_score += black_moves
 
-			white_score += white_mobility
-			black_score += black_mobility
-
-			white_boomgroups = self.boomgroupCalc(player_white)
-			white_avg, n_white_group = boomgroup_average(white_boomgroups)
-			# white_boomloss = self.count_boomloss(white_boomgroups)
-			# white_avg_boomloss = sum(white_boomloss.values()) / len(white_boomloss) # average of boomloss values
-
-			black_boomgroups = self.boomgroupCalc(not player_white)
-			black_avg, n_black_group = boomgroup_average(black_boomgroups)
-
-			# black_boomloss = self.count_boomloss(black_boomgroups)
-			# black_avg_boomloss = sum(black_boomloss.values()) / len(black_boomloss) # average of boomloss values
-
-			white_score -= 10*n_white_group # CHANGE
-			# black_score += 5*n_black_group # CHANGE
-
-			white_score += 10*white_avg # CHANGE
-			# black_score -= 5*black_avg # CHANGE
+			
+			white_score -= white_neighbours/n_whites
+			black_score -= black_neighbours/n_blacks
 
 		if player_white == True:
 			return (white_score - black_score)
@@ -527,7 +472,7 @@ class Board:
 		elif player_white == False:
 			return (black_score - white_score)
 
-
+	
 
 	def outcome(self): 
 		white_count = 0

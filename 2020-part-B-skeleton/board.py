@@ -839,6 +839,8 @@ class Stack:
 
 
 
+
+
 # helper function
 def player_colour(player_white):
 	if player_white:
