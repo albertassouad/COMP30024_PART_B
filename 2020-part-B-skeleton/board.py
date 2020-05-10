@@ -19,12 +19,13 @@ class Board:
 	# These squares may be unoccupied, occupied by a stack of black tokens, or occupied by a stack 
 	# of white tokens
 	def __init__(self, squares, to_=None, from_=None, boom_at=None):
-		self.id = next(self._ids)
 		# self.parent = parent
 		self.squares = squares
 		# This operation is only performed once when board is initialized
 		# Stack is used to save time
+		# self.stack_list, self.coordinates, self.token_count = self.get_stacks()
 		self.stack_list, self.token_count = self.get_stacks()
+
 
 		# variables that store information about the move we're making 
 		# the coordinate we're moving to/from and if we boom
@@ -43,48 +44,17 @@ class Board:
 					token_count += self.squares[i][j].size
 		
 		return stack_list, token_count
-
-	# return lkist of stack of same colour
-	def get_stacks_1colour(self, token_colour):
-		stack_list = [] 
-		token_count = 0
-		for i in range(Board.HEIGHT):
-			for j in range(Board.WIDTH):
-				if self.squares[i][j] != '' and self.squares[i][j].player_white == token_colour:
-					stack_list.append(self.squares[i][j])
-		
-		return stack_list
 	
-	# vector of piece counts
-	#[#whites, #blacks]
-	def vector_form(self, player_white):
-		out_vec = []
-
-		white_tokens = [0]
-		black_tokens = [0]
-
-		for s in self.stack_list: 
-			if s.player_white == True:
-				white_tokens[0] +=  s.size
-			else:
-				black_tokens[0] += s.size
-
-		# outvec = white_tokens + black_tokens 
-		outvec = white_tokens + black_tokens + [float(player_white)]
-
-
-		return [outvec]
-
 	# Creates a brand new board with white and black tokes in starting positions
 	def new_board():
 
-		blacks = [[1,0,7], [1,1,7],   [1,3,7], [1,4,7],   [1,6,7], [1,7,7],
+		blacks = [ [1,0,7], [1,1,7],   [1,3,7], [1,4,7],   [1,6,7], [1,7,7],
          			[1,0,6], [1,1,6],   [1,3,6], [1,4,6],   [1,6,6], [1,7,6]]
 
-		whites = [[1,0,1], [1,1,1],   [1,3,1], [1,4,1],   [1,6,1], [1,7,1],
-         			[1,0,0], [1,1,0],   [1,3,0], [1,4,0],   [1,6,0], [1,7,0]]
+		whites = [[1,0,1], [1,1,1], [1,3,1], [1,4,1],   [1,6,1], [1,7,1],
+         			[1,0,0], [1,1,0],  [1,3,0], [1,4,0],   [1,6,0], [1,7,0]]
 
-     
+    
         # empty board with all squares ''
 		squares = Board.empty_board()
 		# adds white stacks to the
@@ -101,8 +71,6 @@ class Board:
 			squares[x][y] = Stack(x, y, b[0], False)
 
 		return Board(squares)
-
-
 	# function to initialize an empty board
 	def empty_board():
 		squares = []
@@ -113,7 +81,8 @@ class Board:
 				row.append('')
 			squares.append(row)
 		return squares
-
+	# def board_to_string(self):
+	# 	for i in range()
 
 	# Creates a copy of the squares on this board and copies of the stack on occupied squares
 	def copy_squares(self):
@@ -175,348 +144,46 @@ class Board:
 		# Make sure we know which was moved to form this board
 		return Board(new_squares, new_stack, new_stack.parent)
 
+	def book_form(self):
+		string = ""
+		for i in range(Board.HEIGHT):
+			for j in range(Board.HEIGHT):
+				if self.squares[j][i] != '':
+					coordinates = str(self.squares[j][i].x) + str(self.squares[j][i].y) + str(self.squares[j][i].size) + "-"
+					string += coordinates 
+		return string
 
-	
+
 	# Create all the possible board arrangements that can result from this board
 	def possible_moves(self, player_white, maximizingPlayer):
 	
 		moves = []
 		boomed = set()
-		
-		# if player_white == "white":
-		# 	player_white = True
-		# else:
-		# 	player_white = False
-		# Create a list of every resulting board from every move for each stack
+
 		for s in self.stack_list: 
 			# make sure stack being moved is the colour of the player
 			if s.player_white == player_white:
-				moves.extend(s.possible_moves(self, boomed = boomed))
+				moves.extend(s.possible_moves(self, boomed))
 
-		
 		# if len(moves) == 0:
 		# 	return None
 
 		# return moves in descending order if maximizing player - consider best moves first
 		# return moves in ascending order if minimizing player - consider worst moves first
 		if maximizingPlayer:
+			# moves.sort(key=lambda x: x.evaluation(player_white), reverse=True)
 			moves.sort(key=lambda x: x.evaluation(player_white), reverse=True)
 			return moves
 		else:
+			# moves.sort(key=lambda x: x.evaluation(player_white), reverse=False)
 			moves.sort(key=lambda x: x.evaluation(player_white), reverse=False)
 
 			return moves
 
-	
-
-
-	"""
-	* input: board state and color
-	* return list of boomgroup of the input color
-	* a boomgroup is formed by adjacent neighboors
-	"""
-	def boomgroupCalc(self, player_white):
-		tokens = self.get_stacks_1colour(player_white) # list of stack of same color
-		done = set()
-		groups = []
-		for stack in tokens:
-			if not stack in done:
-				# temporary list of tokens without stacks already visited
-				tokens_temp = set(copy.copy(tokens))
-				# set difference with done so distance with stacks in done is not calculated
-				tokens_temp.difference(done) 
-				group = set()
-				group.add(stack)
-
-				# if euclidean distance is less than sqrt(2), other is adjacent to stack
-				for other in tokens_temp:
-					euc_dist = math.sqrt((stack.x - other.x)**2 + (stack.y - other.y)**2)
-					if euc_dist <= math.sqrt(2): 
-						group.add(other)
-				
-
-				done.update(group) # update done set
-				groups.append(group)
-
-			if len(done) == len(tokens): break # if all tokens have been visited
-
-		return groups
-
-	"""	
-	* input: list of boomgroups
-	* return number of boomgroup and average number of token per group	
-	* 
-	"""
-	def boomgroup_average(self, boomgroups):
-		# compute average number of token per group
-		average = 0
-		for group in boomgroups:
-			for stack in group:
-				average += stack.size
-		average = average/len(groups)
-
-		return len(boomgroups), average
-
-
-
-	"""
-	* input: list of boomgroups
-	* return dictionary with position as key and boomloss as value
-	* goal is to find critical positions
-	* boomloss is number of token loss if boom at this position
-	"""
-	def count_boomloss(self,boomgroups):
-		boomloss_counts = {} # key = position : value = boomloss/number of tokens affected
-
-		# list of boomspots for each group and
-		for group in boomgroups:
-
-			# get a list of boomspot for each group and count number of token in that group = boomloss
-			boomspot = set()
-			boomloss = 0
-			for stack in group:
-				boomspot.update(self.boomSpotCalc(stack))
-				boomloss += stack.size
-
-			for position in boomspot:
-				if position not in boomloss_counts: # if key is not in dictionary
-					boomloss_counts.setdefault(position, boomloss)
-				else: boomloss_counts[position] += boomloss
-
-		return boomloss_counts
-
-	"""
-	* input: stack
-	* return boomspots of this stack
-	"""
-	def boomSpotCalc(self, stack):
-
-		spots = set()
-
-		x = stack.x
-		y = stack.y
-
-		for i in range(x-1, x+2):
-				for j in range(y-1, y+2):
-					# spot has to be on board and (empty or another colour)
-					if (stack.onboard(i,j) and (self.squares[i][j] == '' or self.squares[i][j].player_white != stack.player_white)):
-						spots.add((i,j))
-
-		return spots
-
-	# def new_feature(self, player_white):
-
-	# 	stacks = self.get_stacks_1colour(player_white) # list of stack of same color
-	# 	best_stack = None
-	# 	max_count = 0
-
-
-	# 	for stack in stacks:
-	# 		count = 0
-	# 		coordinates = stack.boomSpotCalc(stack)
-	# 		for coordinate in coordinates:
-	# 			if self.squares[coordinate[0]][coordinate[1]] != '' and self.squares[coordinate[0]][coordinate[1]].colour == not player_white:
-	# 				count += self.squares[coordinate[0]][coordinate[1]].size
-
-	# 		if count > max_count:
-	# 			best_stack = stack
-
-
-	# 	return best_stack
-
-
-	def y_diff(self):
-		
-
-		max_white = 0
-		min_black = 8
-
-		for stack in self.stack_list:
-			if stack.player_white:
-				if stack.y > max_white:
-					max_white = stack.y
-			else:
-				if stack.y < min_black:
-					min_black = stack.y
-
-		return abs(max_white - min_black)
-
-		 
-
-
-	
-	"""
-	* input: boomloss value dictionnary
-	* return closer stack to opponent postion with largest boomvalue
-	* explore this move first for better move ordering
-	"""
-	def best_stack(self, boomloss_dict, colour):
-
-		# TODO, check if stack size is smaller than boomloss
-		
-		# get position with highest boomloss value
-		opp_target = max(boomloss_dict, key=boomloss_dict.get) 
-
-
-		stacks = self.get_stacks_1colour(player_white) # list of stack of same color
-
-		best_stack = NULL
-		distance = 100
-		avg_dist = 0
-
-		# find closer stack to target
-		for stack in stacks[1:]:
-			# manhatan distance
-			distance = (math.abs(stack.x - opp_target[0]) + math.abs(stack.y - opp_target[1]))/stack.size
-			avg_dist += distance
-			if distance < best_distance:
-				best_stack = stack
-
-		avg_dist = avg_dist / len(stacks)
-		return best_stack
-
-
-
-	# # Evaluation function will depend on what player_white we are
-	# # simple evaluation function 
-	# def evaluation(self, player_white):
-
-	# 	score = 0
-
-	# 	# white_values = [[-2,-1,-1,-1,-1,-1,-1,-2],
-	# 	# 			[-1,0.5,0.5,0.5,0.5,0.5,0.5,-1],
-	# 	# 			[-1,1,1,1,1,1,1,-1],
-	# 	# 			[-1,2,3,3,3,3,3,-1],
-	# 	# 			[-1,3,3,3,3,3,3,-1],
-	# 	# 			[-1,4,4,4,4,4,4,-1],
-	# 	# 			[-1,5,5,5,5,5,5,-1],
-	# 	# 			[-2,-1,-1,-1,-1,-1,-1,-2]]
-
-	# 	# black_values = [[-2,-1,-1,-1,-1,-1,-1,-2],
-	# 	# 			[-1,5,5,5,5,5,5,-1],
-	# 	# 			[-1,4,4,4,4,4,4,-1],
-	# 	# 			[-1,3,3,3,3,3,3,-1],
-	# 	# 			[-1,2,2,2,2,2,2,-1],
-	# 	# 			[-1,1,1,1,1,1,1,-1],
-	# 	# 			[-1,0.5,0.5,0.5,0.5,0.5,0.5,-1],
-	# 	# 			[-2,-1,-1,-1,-1,-1,-1,-2]]
-
-	# 	values = [[0,0,0,0,0,0,0,0],
-	# 				[1,1,1,1,1,1,1,1],
-	# 				[2,2,2,2,2,2,2,2],
-	# 				[3,3,3,3,3,3,3,3],
-	# 				[3,3,3,3,3,3,3,3],
-	# 				[2,2,2,2,2,2,2,2],
-	# 				[1,1,1,1,1,1,1,1],
-	# 				[0,0,0,0,0,0,0,0]]
-
-	# 	white_values = [[0,0,0,0,0,0,0,0],
-	# 					[1,1,1,1,1,1,1,1],
-	# 					[2,2,2,2,2,2,2,2],
-	# 					[3,3,3,3,3,3,3,3],
-	# 					[4,4,4,4,4,4,4,4],
-	# 					[5,5,5,5,5,5,5,5],	
-	# 					[6,6,6,6,6,6,6,6],
-	# 					[7,7,7,7,7,7,7,7]]
-
-	# 	black_values = [[7,7,7,7,7,7,7,7],
-	# 					[6,6,6,6,6,6,6,6],
-	# 					[5,5,5,5,5,5,5,5],					
-	# 					[4,4,4,4,4,4,4,4],					
-	# 					[3,3,3,3,3,3,3,3],					
-	# 					[2,2,2,2,2,2,2,2],					
-	# 					[1,1,1,1,1,1,1,1],					
-	# 					[0,0,0,0,0,0,0,0]]
-
-	# 	white_counts = 0
-	# 	black_counts = 0
-
-
-	# 	# good thing
-	# 	black_column_dict = {}
-	# 	black_row_dict = {}
-	# 	white_column_dict = {}
-	# 	white_row_dict = {}
-
-
-	# 	for i in range(8):
-	# 		black_column_dict[i] = 1
-	# 		black_row_dict[i] = 1
-	# 		white_column_dict[i] = 1
-	# 		white_row_dict[i] = 1
-
-	# 	for stack in self.stack_list:
-	# 		if stack.player_white:
-	# 			white_column_dict[stack.x] +=  stack.size
-	# 			white_row_dict[stack.y] += stack.size
-	# 		else:
-	# 			black_column_dict[stack.x] +=  stack.size
-	# 			black_row_dict[stack.y] += stack.size
-
-
-	# 	# feature_vector = self.vector_form()
-
-	# 	for s in self.stack_list: 
-	# 		x = s.x
-	# 		y = s.y
-	# 		# if s.player_white == "white":
-	# 		if s.player_white == True:
-	# 			#for each token we
-	# 			#white_counts += 100*s.size + white_values[y][x]
-	# 			white_counts += 100*s.size +  values[y][x] #+ black_column_dict[x]*black_row_dict[y]
-
-	# 		elif s.player_white == False:
-	# 			# black_counts += 100*s.size + black_values[y][x]*s.size
-	# 			black_counts += 100*s.size + values[y][x] #+ white_column_dict[x]*white_row_dict[y]
-		
-
-	# 	if player_white == True:
-	# 		diff =  (white_counts - black_counts) - self.y_diff()
-
-	# 	elif player_white == False:
-	# 		diff =  (black_counts - white_counts) - self.y_diff()
-
-	# 	return diff
-
-
-
-
-	# 	# feature of our tokens
-	# 	my_boomgroups = self.boomgroupCalc(player_white)
-	# 	my_boomloss = self.count_boomloss(my_boomgroups)
-	# 	print("\n\n\n\n\n")
-	# 	squares_to_string(self.squares)
-	# 	print("\n\n")
-	# 	print("MY BOOMLOSS", my_boomloss)
-	# 	my_avg_boomloss = sum(my_boomloss.values()) / len(my_boomloss) # average of boomloss values
-
-
-	# 	# feature of opponent tokens
-	# 	opp_boomgroups = self.boomgroupCalc(not player_white)
-	# 	opp_boomloss = self.count_boomloss(opp_boomgroups)
-	# 	print("\n\n")
-	# 	print("OPP BOOMLOSS", opp_boomloss)
-	# 	print("\n\n")
-	# 	opp_avg_boomloss = sum(opp_boomloss.values()) / len(opp_boomloss)
-
-		
-	# 	# weight is positive when the bigger the value the better
-	# 	# weight is negative when the smaller the value the better 
-	# 	features_weights = [[diff, 1],
-	# 						[my_avg_boomloss, -1],
-	# 						[opp_avg_boomloss, 1]]
-
-
-	# 	# compute evaluation based on features and weights
-	# 	eval_value = 0
-	# 	for f_w in features_weights:
-	# 		eval_value += f_w[0]*f_w[1]
-
-	# 	return eval_value
-
 	def neighbours(self, stack):
-
-		count = 0
+		black = 0
+		white = 0
+		# count = 0
 		x = stack.x
 		y = stack.y
 		for i in range(x-1, x+2):
@@ -524,108 +191,268 @@ class Board:
 				for j in range(y-1, y+2):
 					if j >= 0 and j <= 7:
 						if self.squares[i][j] != '' and (i,j) != (x, y):
-							if self.squares[i][j].player_white == stack.player_white:
-								# count += 1
-								count += self.squares[i][j].size
-		return count
+							# if self.squares[i][j].player_white == stack.player_white:
+							if self.squares[i][j].player_white == True:
+								# white += self.squares[i][j].size
+								# white += self.squares[i][j].size
+								white += 1
+							else:
+								# black += self.squares[i][j].size
+								# black += self.squares[i][j].size
+								black += 1
+
+		# friend += stack.size
+
+		return black, white
+		# return 
 
 	def manhattan(self, stack1, stack2):
 		return abs(stack1.x - stack2.x) + abs(stack1.y - stack2.y)
 
 	def evaluation(self, player_white):
 
-		values = [[0,0,0,0,0,0,0,0],
-					[1,1,1,1,1,1,1,1],
-					[2,2,2,2,2,2,2,2],
-					[2,3,3,3,3,3,3,2],
-					[2,3,3,3,3,3,3,2],
-					[2,2,2,2,2,2,2,2],
-					[1,1,1,1,1,1,1,1],
-					[0,0,0,0,0,0,0,0]]
+		# white_values = [[0,0,0,0,0,0,0,0],
+		# 			[1,1,1,1,1,1,1,1],
+		# 			[2,2,2,2,2,2,2,2],
+		# 			[3,3,3,3,3,3,3,3],
+		# 			[4,4,4,4,4,4,4,4],
+		# 			[5,5,5,5,5,5,5,5],
+		# 			[5,5,5,5,5,5,5,5],
+		# 			[5,5,5,5,5,5,5,5]]
+
+		values = [[-1,-.5,-.5,-.5,-.5,-.5,-.5,-1],
+					[-.25,1,1,1,1,1,1,-.25],
+					[-.25,1,1,1,1,1,1,-.25],
+					[-.25,1,1,1,1,1,1,-.25],
+					[-.25,1,1,1,1,1,1,-.25],
+					[-.25,1,1,1,1,1,1,-.25],
+					[-.25,1,1,1,1,1,1,-.25],
+					[-1,-.5,-.5,-.5,-.5,-.5,-.5,-1]]
 
 		white_score = 0 
 		black_score = 0
-
+		# for density
 		best_white = None
 		max_white = 0
 		
 		best_black = None
 		max_black = 0
-		# neighbour_dict = {}
-		white_moves = 0 
-		black_moves = 0
+
+		white_positions = 0 
+		black_positions = 0
 
 		white_neighbours = 0
 		black_neighbours = 0
 
-		white_dist = 0 
-		black_dist = 0
+		w_black_neighbours = 0 
+		b_white_neighbours = 0
+
+		# white_dist = 0 
+		# black_dist = 0
+
 
 		n_whites = 0
 		n_blacks = 0
 
+		white_stacks = 0
+		black_stacks = 0
+
+		# black_row = {}
+		# black_column = {}
+		# white_row = {}
+		# white_column = {}
+
+		# white_multi_stacks = 0
+		# black_multi_stacks = 0
+
+		# white_3_stacks = 0 
+		# black_3_stacks = 0
+
+		# min_dist_enemy_white = 7
+		# min_dist_enemy_black = 7
+
+		whites_in_black_half = 0
+		blacks_in_white_half = 0
+
+		# whites_out_of_box = 0
+		# blacks_out_of_box = 0
+
+		minimum_dist_densest_black = 100
+		minimum_dist_densest_white = 100
+
+
 		for s in self.stack_list:
-			n = self.neighbours(s)
+			
+			b_neighbours, w_neighbours = self.neighbours(s)
+
 			if s.player_white:
+
+				if s.y >= 4:
+					whites_in_black_half += 1
+
+				# if s.size > 1:
+				# 	white_multi_stacks += 1
+				# elif s.size > 2:
+					# white_3_stacks += 1
+
+				# if s.x not in black_row:
+				# 	black_row[s.x] = 1
+				# else:
+				# 	black_row[s.x] += 1
+
+				# if s.y not in black_column:
+				# 	black_column[s.y] = 1
+				# else:
+				# 	black_column[s.y] += 1
+
+				#keep a count of number of white tokens 
+				# and number of white stack
 				n_whites += s.size
-				white_neighbours += n
-				if best_white == None:
+				white_stacks += 1
+
+				w_black_neighbours += b_neighbours
+				white_neighbours += w_neighbours
+
+				density = w_neighbours + s.size
+				if density > max_white:
+					max_white = density
 					best_white = s
-				if n >= max_white:
-					max_white = n
-					best_white = s
-				if s.size == 1:
-					white_moves += s.size*values[s.y][s.x] 
+				
+				if s.size <= 4:
+					white_positions += s.size*values[s.y][s.x]
 				else:
-					white_moves += 2 * values[s.y][s.x]
+					white_positions += 4*values[s.y][s.x]
+				# if s.size <= 2:
+				# 	white_positions += values[s.y][s.x]
+				# else:
+				# 	white_positions += s.size
+			
 			else:
+
+				if s.y <= 3:
+					blacks_in_white_half += 1
+
+				# if s.size > 1:
+				# 	black_multi_stacks += 1
+				# elif s.size > 2:
+				# 	black_3_stacks += 1
+
+				# if s.x not in white_row:
+				# 	white_row[s.x] = 1
+				# else:
+				# 	white_row[s.x] += 1
+
+				# if s.y not in white_column:
+				# 	white_column[s.y] = 1
+				# else:
+				# 	white_column[s.y] += 1
+
 				n_blacks += s.size
-				black_neighbours += n
-				if best_black == None:
+				black_stacks += 1
+
+				black_neighbours += b_neighbours 
+				b_white_neighbours += w_neighbours
+
+				#densest white stack
+				density = b_neighbours + s.size
+				#densest black stack
+				if density >= max_black:
+				# if n + s.size >= max_black:
+					max_black = density
 					best_black = s
-				if n >= max_black:
-					max_black = n
-					best_black = s
-				if s.size == 1:
-					black_moves += s.size*values[s.y][s.x]
+				# if s.size == 1:
+					# black_moves += s.size*values[s.y][s.x]
+					# black_moves += s.size * values[s.y][s.x]
+				
+				# if s.size <= 2:
+				# 	black_positions += values[s.y][s.x]
+				# else:
+				# 	black_positions += s.size
+
+				if s.size <= 5:
+					black_positions += s.size*values[s.y][s.x]
 				else:
-					black_moves +=  2 * values[s.y][s.x] 
+					black_positions += 5*values[s.y][s.x]
 
 		if n_whites == 0 and n_blacks == 0:
-			white_score = 0
-			black_score = 0
+			eval_score = 0
+			# white_score = 0
+			# black_score = 0
 		elif n_whites != 0 and n_blacks == 0:
-			white_score = 100000000000000000
+			eval_score = 10000000000
+			# white_score = 10000000000
 		elif n_whites == 0 and n_blacks != 0:
-			black_score = 100000000000000000
+			# black_score = 10000000000
+			eval_score = -10000000000
 		else:
 			for s in self.stack_list: 
-
 				if s.player_white == True:
-					white_dist += self.manhattan(s, best_black)
+					minimum_dist_densest_black = min(minimum_dist_densest_black, self.manhattan(s, best_black))
+					# white_dist += self.manhattan(s, best_black)
 				elif s.player_white == False:
-					black_dist += self.manhattan(s, best_white)
+					minimum_dist_densest_white = min(minimum_dist_densest_white, self.manhattan(s, best_white))
 
+					# black_dist += self.manhattan(s, best_white)
+				
+			# if n_whites > n_blacks:
+			# 	white_score -= 10*minimum_dist_densest_black
+			# 	black_score += 10*minimum_dist_densest_white
+			# elif n_blacks > n_whites:
+			# 	white_score += 10*minimum_dist_densest_black
+			# 	black_score -= 10*minimum_dist_densest_white
+			# else:
+			
+			#FEATURE 1: minimize the minimum distance to the densest stack of the opposing colour (+1)
+			
+
+			#FEATURE 2: preserve self tokens and destroy enemy tokens
 			white_score += 1000*n_whites
 			black_score += 1000*n_blacks
 
-			white_score -= white_dist/n_whites
-			black_score -= black_dist/n_whites
+			white_score -= minimum_dist_densest_black
+			black_score -= minimum_dist_densest_white
 
-			white_score += white_moves
-			black_score += black_moves
+			#FEATURE 3: MOVE OUR PIECES INTO OPPONENT HALF
+			# KEEP OPPONENT PIECES OUT OF OUR HALF
+			# white_score -= blacks_in_white_half
+			# black_score -= whites_in_black_half
 
-			
-			white_score -= white_neighbours/n_whites
-			black_score -= black_neighbours/n_blacks
+			white_score -= 10*w_neighbours
+			black_score -= 10*b_neighbours
+
+			white_score += w_black_neighbours
+			black_score += b_white_neighbours
+
+
+			# penalize corners and edges
+			white_score += 10*white_positions
+			black_score += 10*black_positions
+
+
+			# white_score += 0.5 * (len(white_column) + len(white_row))
+			# black_score += 0.5 * (len(black_column) + len(black_row))
+
+
+			eval_score = white_score - black_score
 
 		if player_white == True:
-			return (white_score - black_score)
+			return eval_score
+			# if n_whites > n_blacks:
+			# 	return eval_score/self.token_count
+			# elif n_blacks > n_whites:
+			# 	return eval_score*self.token_count
+			# else:
+			# 	return eval_score
 			# return white_score - black_score
 		elif player_white == False:
-			return (black_score - white_score)
+			return -eval_score
+			# if n_whites > n_blacks:
+			# 	return -eval_score/self.token_count
+			# elif n_blacks > n_whites:
+			# 	return -eval_score*self.token_count
+			# else:
+			# 	return -eval_score
 
-	
 
 	def outcome(self): 
 		white_count = 0
@@ -697,12 +524,13 @@ class Stack:
 		return str(self.size) + "," + colour
 
 
-	def boom(self, board, boomed = None): # boomed = None when boom() is called from player class to update board
+	def boom(self, board, boomed=None):
 		# Find all coordinates affected by booming this stack
 		coordinates = boomzones.find_boomzones(self, board.squares)
 		# Add affected coordinate to boomed
 		if boomed != None:
 			boomed.update(coordinates)
+		# boomed.update(coordinates)
 		# Create copy of the board with copies of the Stack objects 
 		new_squares = board.copy_squares()
 		# Remove all stacks (stack -> '') in these coordinates
@@ -729,7 +557,7 @@ class Stack:
 				# Make sure the piece keep the tokens on the board
 				if self.onboard(new_x, new_y):
 					# Create a new stack with these coordinte and size
-					# self denotes parent of the stack we used to get here
+					# self denotes arent of the stack we used to get here
 					stack = Stack(new_x, new_y, j, self.player_white, self)
 					# Returns a board with this stack integrated and old stack edited
 					# if not terminal:
@@ -828,11 +656,9 @@ class Stack:
 
 
 	def onboard(self, x, y):
-		if (x >= 0 and x < 8) and (y >= 0 and y < 8):
+		if (x >= 0 and x < Board.HEIGHT) and (y >= 0 and y < Board.WIDTH):
 			return True
 		return False
-
-
 
 
 
