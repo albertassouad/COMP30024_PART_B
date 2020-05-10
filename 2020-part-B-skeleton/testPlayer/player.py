@@ -1,8 +1,7 @@
 
-from board2 import Board
-from board2 import Stack
-from board2 import squares_to_string
-from ai_class2 import AI
+from board import Board
+from board import Stack
+from ai_class_z import AI
 import random
 class ExamplePlayer:
     def __init__(self, colour):
@@ -37,7 +36,7 @@ class ExamplePlayer:
         # agent decide move
         
 
-        chosen_move = self.agent.best_move()[1]
+        chosen_move = self.agent.best_move()
 
         if chosen_move.boom_at == None: # it is "MOVE"
             return ("MOVE", chosen_move.to_.size, (chosen_move.from_.x, chosen_move.from_.y), (chosen_move.to_.x,chosen_move.to_.y))

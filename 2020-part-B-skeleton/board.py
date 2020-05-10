@@ -1,7 +1,6 @@
 import copy
 import boomzones
 import math
-from itertools import count
 
 
 
@@ -12,7 +11,6 @@ class Board:
 	# dimension of a board
 	HEIGHT = 8
 	WIDTH = 8
-	_ids = count(0) # count number of boards
 
 
 	# A board is initialized with the squares it consists of

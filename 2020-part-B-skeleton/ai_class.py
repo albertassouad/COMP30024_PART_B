@@ -7,6 +7,7 @@ class AI:
 	def __init__(self, board, player_white, depth):
 		# self.parent = parent
 		self.board = board
+		self.turn = 0 # REMOVE LATER, FOR PERFORMANCE
 		# initialize whether the player is white or not
 		self.player_white = player_white
 		self.depth = depth
@@ -29,6 +30,9 @@ class AI:
 
 		if self.first_move == False:
 			self.first_move = True
+
+		self.turn += 1
+		print("Turn == ", self.turn)
 
 		alpha = -1000000
 		beta = 1000000
