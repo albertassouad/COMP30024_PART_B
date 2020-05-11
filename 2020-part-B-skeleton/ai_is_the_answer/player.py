@@ -1,7 +1,6 @@
 
 from board import Board
 from board import Stack
-from board import squares_to_string
 from ai_class import AI
 import random
 class ExamplePlayer:
