@@ -1,5 +1,5 @@
 import copy
-import boomzones
+import ai_is_the_answer.boomzones as boomzones
 import math
 
 

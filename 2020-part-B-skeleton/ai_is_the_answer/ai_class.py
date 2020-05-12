@@ -1,6 +1,5 @@
-import time
-import openingbook
-from board import Stack
+import ai_is_the_answer.openingbook as openingbook
+from ai_is_the_answer.board import Stack
 import random
 
 class AI:

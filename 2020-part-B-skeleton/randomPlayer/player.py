@@ -1,7 +1,6 @@
 
-from board import Board
-from board import Stack
-from board import squares_to_string
+from randomPlayer.board import Board
+from randomPlayer.board import Stack
 import random
 class ExamplePlayer:
     def __init__(self, colour):

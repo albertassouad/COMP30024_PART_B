@@ -1,7 +1,7 @@
 
-from board import Board
-from board import Stack
-from ai_class import AI
+from ai_is_the_answer.board import Board
+from ai_is_the_answer.board import Stack
+from ai_is_the_answer.ai_class import AI
 import random
 class ExamplePlayer:
     def __init__(self, colour):
