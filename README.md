@@ -1,5 +1,5 @@
 # COMP30024_PART_B
-Expendibots is a two-person course project that I completed during my exchange semester at the University of Melbourne.
+Expendibots is a two-person course project for the artificial intelligence course at University of Melbourne.
 
 The game is played on a 8 × 8 board. Two players, White and Black, play the game. Each player initially controls 12 tokens of their own colour. Each board configuration represents a node in a tree and each move represents an edge in a tree. Basically, at their own turn, each players does a tree traversal to find the best next move.
 
